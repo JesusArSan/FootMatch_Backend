@@ -1,10 +1,4 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.options = void 0;
-var options = exports.options = {
+export const options = {
   definition: {
     info: {
       title: "Users API"

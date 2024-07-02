@@ -1,14 +1,7 @@
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-var _express = require("express");
-var _users = require("../controllers/users");
 // Urls that the app can visit
-
-var router = (0, _express.Router)();
+import { Router } from "express";
+import { createUser, deleteUser, getUser, getUsersCount, getUsers, updateUser, loginUser, getUserByUsername, getUserByEmail, validateToken } from "../controllers/users";
+const router = Router();
 
 // Swagger
 /**
@@ -25,7 +18,7 @@ var router = (0, _express.Router)();
  *    summary: Get all users
  *    tags: [Users]
  */
-router.get("/users", _users.getUsers); // Obtener todas las usuarios
+router.get("/users", getUsers); // Obtener todas las usuarios
 
 /**
  * @swagger
@@ -34,7 +27,7 @@ router.get("/users", _users.getUsers); // Obtener todas las usuarios
  *    summary: Get the number of users
  *    tags: [Users]
  */
-router.get("/users/count", _users.getUsersCount); // Obtener núm usuarios
+router.get("/users/count", getUsersCount); // Obtener núm usuarios
 
 /**
  * @swagger
@@ -43,7 +36,7 @@ router.get("/users/count", _users.getUsersCount); // Obtener núm usuarios
  *    summary: Get a user
  *    tags: [Users]
  */
-router.get("/users/:id", _users.getUser); // Obtener una usuario
+router.get("/users/:id", getUser); // Obtener una usuario
 
 /**
  * @swagger
@@ -52,7 +45,7 @@ router.get("/users/:id", _users.getUser); // Obtener una usuario
  *    summary: Get a user by username
  *    tags: [Users]
  */
-router.get("/users/username/:username", _users.getUserByUsername); // Obtener un usuario por nombre de usuario
+router.get("/users/username/:username", getUserByUsername); // Obtener un usuario por nombre de usuario
 
 /**
  * @swagger
@@ -61,7 +54,7 @@ router.get("/users/username/:username", _users.getUserByUsername); // Obtener un
  *    summary: Get a user by email
  *    tags: [Users]
  */
-router.get("/users/email/:email", _users.getUserByEmail); // Obtener un usuario por correo electrónico
+router.get("/users/email/:email", getUserByEmail); // Obtener un usuario por correo electrónico
 
 /**
  * @swagger
@@ -70,7 +63,7 @@ router.get("/users/email/:email", _users.getUserByEmail); // Obtener un usuario 
  *    summary: Add a user
  *    tags: [Users]
  */
-router.post("/users/signup", _users.createUser); // Create an user
+router.post("/users/signup", createUser); // Create an user
 
 /**
  * @swagger
@@ -79,7 +72,7 @@ router.post("/users/signup", _users.createUser); // Create an user
  *    summary: Delete a user
  *    tags: [Users]
  */
-router["delete"]("/users/:id", _users.deleteUser); // borra una unica usuario
+router.delete("/users/:id", deleteUser); // borra una unica usuario
 
 /**
  * @swagger
@@ -88,7 +81,7 @@ router["delete"]("/users/:id", _users.deleteUser); // borra una unica usuario
  *    summary: Update a user
  *    tags: [Users]
  */
-router.put("/users/:id", _users.updateUser); // Actualizar una usuario
+router.put("/users/:id", updateUser); // Actualizar una usuario
 
 /**
  * @swagger
@@ -97,7 +90,7 @@ router.put("/users/:id", _users.updateUser); // Actualizar una usuario
  *    summary: Login
  *    tags: [Users]
  */
-router.post("/users/login", _users.loginUser); // Login
+router.post("/users/login", loginUser); // Login
 
 /**
  * @swagger
@@ -106,5 +99,6 @@ router.post("/users/login", _users.loginUser); // Login
  *    summary: Token Validation
  *    tags: [token]
  */
-router.post("/users/token", _users.validateToken); // Validate Token
-var _default = exports["default"] = router;
+router.post("/users/token", validateToken); // Validate Token
+
+export default router;
