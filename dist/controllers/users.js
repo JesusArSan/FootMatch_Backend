@@ -402,25 +402,26 @@ var loginUser = exports.loginUser = /*#__PURE__*/function () {
     return _regenerator["default"].wrap(function _callee11$(_context11) {
       while (1) switch (_context11.prev = _context11.next) {
         case 0:
-          _context11.next = 2;
+          _context11.prev = 0;
+          _context11.next = 3;
           return (0, _database.connect)();
-        case 2:
+        case 3:
           connection = _context11.sent;
-          _context11.next = 5;
+          _context11.next = 6;
           return connection.query("SELECT * FROM users WHERE username = ? AND password = ?", [req.body.username, req.body.password]);
-        case 5:
+        case 6:
           _yield$connection$que17 = _context11.sent;
           _yield$connection$que18 = (0, _slicedToArray2["default"])(_yield$connection$que17, 1);
           rows = _yield$connection$que18[0];
           user = rows[0]; // Check if the user exists
-          if (!(user.length == 0)) {
-            _context11.next = 13;
+          if (user) {
+            _context11.next = 14;
             break;
           }
           return _context11.abrupt("return", res.status(404).json({
             message: "User not found"
           }));
-        case 13:
+        case 14:
           // Generate a token
           token = jwt.sign({
             id: user.id
@@ -434,11 +435,21 @@ var loginUser = exports.loginUser = /*#__PURE__*/function () {
           res.json(_objectSpread(_objectSpread({}, user), {}, {
             token: token
           }));
-        case 16:
+        case 17:
+          _context11.next = 23;
+          break;
+        case 19:
+          _context11.prev = 19;
+          _context11.t0 = _context11["catch"](0);
+          console.error("Login error: ", _context11.t0);
+          res.status(500).json({
+            message: "Internal server error"
+          });
+        case 23:
         case "end":
           return _context11.stop();
       }
-    }, _callee11);
+    }, _callee11, null, [[0, 19]]);
   }));
   return function loginUser(_x21, _x22) {
     return _ref11.apply(this, arguments);
