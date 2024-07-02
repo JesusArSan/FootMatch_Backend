@@ -1,0 +1,71 @@
+@api = http://localhost:3000/users
+
+
+GET {{api}}
+
+###
+
+GET {{api}}/3
+
+###
+
+GET {{api}}/username/root
+
+###
+
+GET {{api}}/email/root@gmail.com
+
+###
+
+GET {{api}}/count
+
+###
+
+POST {{api}}/signup
+Content-Type: application/json
+
+{
+    "name": "Prueba",
+    "email": "prueba@gmail.com",
+    "username": "prueba",
+    "password": "root"
+}
+
+###
+
+DELETE {{api}}/14
+
+###
+
+PUT {{api}}/6
+Content-Type: application/json
+
+{
+    "name": "Guille",
+    "email": "guille@gmail.com",
+    "username": "guillep",
+    "password": "guillep"    
+}
+
+###
+
+POST {{api}}/login
+Content-Type: application/json
+
+{
+    "username": "root",
+    "password": "root"
+}
+
+# Validate Token
+###
+GET {{api}}/token/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE5NzkzMTE0LCJleHAiOjE3MTk3OTMxMTV9.ZdvJfjQ9UOghzetFNVLAeFPnTQNzJHh5Y_5iVbLUk0o
+
+# Validate Token
+###
+POST {{api}}/token
+Content-Type: application/json
+
+{
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE5ODc1MjQ4LCJleHAiOjE3MTk5NjE2NDh9.Qv_SNVQFPPtc9hv7FYO5wTuCsKNvQgFOk5xBDWXFhgs"
+}
