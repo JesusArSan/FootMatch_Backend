@@ -33,18 +33,18 @@ Content-Type: application/json
 
 ###
 
-DELETE {{api}}/14
+DELETE {{api}}/4
 
 ###
 
-PUT {{api}}/6
+PUT {{api}}/2
 Content-Type: application/json
 
 {
-    "name": "Guille",
-    "email": "guille@gmail.com",
-    "username": "guillep",
-    "password": "guillep"    
+    "name": "Antonio",
+    "email": "tone@gmail.com",
+    "username": "tone",
+    "password": "tone"    
 }
 
 ###

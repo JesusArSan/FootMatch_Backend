@@ -459,7 +459,6 @@ var loginUser = exports.loginUser = /*#__PURE__*/function () {
 // Validation token
 var validateToken = exports.validateToken = function validateToken(req, res) {
   var token = req.body.token;
-  console.log("hola");
   if (!token) {
     return res.status(403).json({
       message: "No token provided"

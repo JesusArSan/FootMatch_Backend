@@ -241,7 +241,6 @@ export const loginUser = async (req, res) => {
 // Validation token
 export const validateToken = (req, res) => {
 	const token = req.body.token;
-	console.log("hola");
 	if (!token) {
 		return res.status(403).json({ message: "No token provided" });
 	}
