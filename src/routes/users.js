@@ -19,7 +19,7 @@ import {
 	removeFriendRequest,
 	removeFriend,
 	validateToken,
-} from "../controllers/users";
+} from "../controllers/users.js";
 
 const router = Router();
 

@@ -6,7 +6,7 @@ import {
 	getPitchOccupancy,
 	setFavCenter,
 	deleteFavCenter,
-} from "../controllers/centers";
+} from "../controllers/centers.js";
 
 const router = Router();
 

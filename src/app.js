@@ -6,11 +6,11 @@ import morgan from "morgan";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
-import { options } from "./swaggerOptions";
+import { options } from "./swaggerOptions.js";
 const specs = swaggerJSDoc(options); // Swagger options
 
-import usersRoutes from "./routes/users";
-import centersRoutes from "./routes/centers";
+import usersRoutes from "./routes/users.js";
+import centersRoutes from "./routes/centers.js";
 
 const app = express();
 

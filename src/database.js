@@ -1,5 +1,5 @@
 import mysql from "mysql2/promise";
-import { config } from "./config"; // Import the config object
+import { config } from "./config.js"; // Import the config object
 
 // Crear un pool de conexiones
 export const pool = mysql.createPool(config);

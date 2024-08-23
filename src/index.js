@@ -1,5 +1,5 @@
-import app from "./app";
-import "./database";
+import app from "./app.js";
+import "./database.js";
 
 // Server listen on port 3000
 app.listen(3000);

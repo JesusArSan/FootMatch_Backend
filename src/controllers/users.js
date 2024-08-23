@@ -1,5 +1,5 @@
-import { getConnection } from "../database";
-const jwt = require("jsonwebtoken");
+import { getConnection } from "../database.js";
+import jwt from "jsonwebtoken";
 
 // Global variable
 const SECRET_KEY = process.env.SECRET_KEY;
