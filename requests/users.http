@@ -1,26 +1,27 @@
 @api = http://localhost:3000/users
 
 
+# Get Users
 GET {{api}}
-
 ###
 
+# Get User by ID
 GET {{api}}/3
-
 ###
 
+# Get User by Username
 GET {{api}}/username/root
-
 ###
 
+# Get User by Email
 GET {{api}}/email/root@gmail.com
-
 ###
 
+# Get number of Users
 GET {{api}}/count
-
 ###
 
+# Sign Up User
 POST {{api}}/signup
 Content-Type: application/json
 
@@ -30,13 +31,13 @@ Content-Type: application/json
     "username": "prueba",
     "password": "root"
 }
-
 ###
 
+# Delete a user
 DELETE {{api}}/4
-
 ###
 
+# Update a user
 PUT {{api}}/2
 Content-Type: application/json
 
@@ -46,9 +47,9 @@ Content-Type: application/json
     "username": "tone",
     "password": "tone"    
 }
-
 ###
 
+# Login User
 POST {{api}}/login
 Content-Type: application/json
 
@@ -56,10 +57,66 @@ Content-Type: application/json
     "username": "root",
     "password": "root"
 }
+###
+
+# Get Friends
+GET {{api}}/friends/3
+###
+
+# Get isFriend
+POST {{api}}/friends
+Content-Type: application/json
+
+{
+    "userId": 1,
+    "friendId": 3
+}
+###
+
+# Get Friend Requests
+GET {{api}}/friend_requests/3
+###
+
+# Send Friend Request
+POST {{api}}/friend_requests
+Content-Type: application/json
+
+{
+  "sender_id": 1,
+  "receiver_id": 3
+}
+###
+
+# Accept Friend Request
+PUT {{api}}/friend_requests/accept
+Content-Type: application/json
+
+{
+    "requestId": 203
+}
+###
+
+# Get Friend Request status
+POST {{api}}/friend_requests/status/
+Content-Type: application/json
+
+{
+    "sender_id": 3,
+    "receiver_id": 1
+}
+###
+
+# Remove Friend Request
+DELETE {{api}}/friend_requests/3/1
+###
+
+# Delete Friend
+DELETE {{api}}/remove_friend/1/3
+###
 
 # Validate Token
-###
 GET {{api}}/token/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE5NzkzMTE0LCJleHAiOjE3MTk3OTMxMTV9.ZdvJfjQ9UOghzetFNVLAeFPnTQNzJHh5Y_5iVbLUk0o
+###
 
 # Validate Token
 ###
@@ -69,3 +126,5 @@ Content-Type: application/json
 {
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzE5ODc1MjQ4LCJleHAiOjE3MTk5NjE2NDh9.Qv_SNVQFPPtc9hv7FYO5wTuCsKNvQgFOk5xBDWXFhgs"
 }
+###
+

@@ -107,4 +107,76 @@ router.post("/users/login", _users.loginUser); // Login
  *    tags: [token]
  */
 router.post("/users/token", _users.validateToken); // Validate Token
+
+/**
+ * @swagger
+ * /users/friends/{id}:
+ * get:
+ *   summary: Get friends
+ *   tags: [Users]
+ */
+router.get("/users/friends/:id", _users.getFriends); // Get Friends
+
+/**
+ * @swagger
+ * /users/friends/{id}:
+ * get:
+ *   summary: is Friend
+ *   tags: [Users]
+ */
+router.post("/users/friends/", _users.isFriend); // isFriend
+
+/**
+ * @swagger
+ * /users/friend_requests/{id}:
+ * get:
+ *   summary: Get friend requests
+ *   tags: [Users]
+ */
+router.get("/users/friend_requests/:id", _users.getFriendRequests); // Get Friend Requests
+
+/**
+ * @swagger
+ * /users/send_friend_request:
+ * post:
+ *   summary: Send friend request
+ *   tags: [Users]
+ */
+router.post("/users/friend_requests", _users.sendFriendRequest); // Send Friend Request
+
+/**
+ * @swagger
+ * /users/friend_request/accept:
+ * post:
+ *   summary: Accept friend request
+ *   tags: [Users]
+ */
+router.put("/users/friend_requests/accept", _users.acceptFriendRequest); // Accept Friend Request
+
+/**
+ * @swagger
+ * /users/remove_friend:
+ * post:
+ *   summary: Remove Friend
+ *   tags: [Users]
+ */
+router["delete"]("/users/remove_friend/:userId/:friendId", _users.removeFriend); // Remove friend
+
+/**
+ * @swagger
+ * /users/friend_request/status:
+ * post:
+ *   summary: Remove Friend
+ *   tags: [Users]
+ */
+router.post("/users/friend_requests/status/", _users.getFriendRequestStatus); // Remove friend
+
+/**
+ * @swagger
+ * /users/friend_request/status:
+ * post:
+ *   summary: Remove Friend Request
+ *   tags: [Friend Requests]
+ */
+router["delete"]("/users/friend_requests/:userId/:friendId", _users.removeFriendRequest); // Remove friend request
 var _default = exports["default"] = router;

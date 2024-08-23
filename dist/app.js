@@ -12,6 +12,7 @@ var _swaggerJsdoc = _interopRequireDefault(require("swagger-jsdoc"));
 var _swaggerUiExpress = _interopRequireDefault(require("swagger-ui-express"));
 var _swaggerOptions = require("./swaggerOptions");
 var _users = _interopRequireDefault(require("./routes/users"));
+var _centers = _interopRequireDefault(require("./routes/centers"));
 // Express configuration
 
 var specs = (0, _swaggerJsdoc["default"])(_swaggerOptions.options); // Swagger options
@@ -23,6 +24,8 @@ app.use(_express["default"].json()); // Allow the app to understand JSON
 
 // UserRoutes from the file routes/users.js. The app can visit the routes defined in the file users.js ONLY
 app.use(_users["default"]);
+// CentersRoutes from the file routes/centers.js
+app.use(_centers["default"]);
 
 // Swagger. Documents the routes
 app.use("/docs", _swaggerUiExpress["default"].serve, _swaggerUiExpress["default"].setup(specs));

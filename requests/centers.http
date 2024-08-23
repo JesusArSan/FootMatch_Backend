@@ -1,0 +1,34 @@
+@api = http://localhost:3000/centers
+
+
+# Get Centers
+GET {{api}}
+###
+
+# Get Fav Centers
+GET {{api}}/1
+###
+
+# Get Pitch Occupancy
+GET {{api}}/pitch/1
+###
+
+# Add center to fav user list
+POST {{api}}/add_fav_center
+Content-Type: application/json
+
+{
+   "user_id": 1,
+   "center_id": 7
+}
+###
+
+# Delete center from fav user list
+DELETE {{api}}/del_fav_center
+Content-Type: application/json
+
+{
+   "user_id": 1,
+   "center_id": 7
+}
+###

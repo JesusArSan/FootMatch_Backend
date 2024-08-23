@@ -1,0 +1,4 @@
+# Ignore this files and folders before uploading to the server
+.env
+dist/
+node_modules/

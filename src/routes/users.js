@@ -1,16 +1,24 @@
 // Urls that the app can visit
 import { Router } from "express";
 import {
-  createUser,
-  deleteUser,
-  getUser,
-  getUsersCount,
-  getUsers,
-  updateUser,
-  loginUser,
-  getUserByUsername,
-  getUserByEmail,
-  validateToken,
+	createUser,
+	deleteUser,
+	getUser,
+	getUsersCount,
+	getUsers,
+	updateUser,
+	loginUser,
+	getUserByUsername,
+	getUserByEmail,
+	getFriends,
+	isFriend,
+	getFriendRequests,
+	sendFriendRequest,
+	acceptFriendRequest,
+	getFriendRequestStatus,
+	removeFriendRequest,
+	removeFriend,
+	validateToken,
 } from "../controllers/users";
 
 const router = Router();
@@ -112,5 +120,77 @@ router.post("/users/login", loginUser); // Login
  *    tags: [token]
  */
 router.post("/users/token", validateToken); // Validate Token
+
+/**
+ * @swagger
+ * /users/friends/{id}:
+ * get:
+ *   summary: Get friends
+ *   tags: [Users]
+ */
+router.get("/users/friends/:id", getFriends); // Get Friends
+
+/**
+ * @swagger
+ * /users/friends/{id}:
+ * get:
+ *   summary: is Friend
+ *   tags: [Users]
+ */
+router.post("/users/friends/", isFriend); // isFriend
+
+/**
+ * @swagger
+ * /users/friend_requests/{id}:
+ * get:
+ *   summary: Get friend requests
+ *   tags: [Users]
+ */
+router.get("/users/friend_requests/:id", getFriendRequests); // Get Friend Requests
+
+/**
+ * @swagger
+ * /users/send_friend_request:
+ * post:
+ *   summary: Send friend request
+ *   tags: [Users]
+ */
+router.post("/users/friend_requests", sendFriendRequest); // Send Friend Request
+
+/**
+ * @swagger
+ * /users/friend_request/accept:
+ * post:
+ *   summary: Accept friend request
+ *   tags: [Users]
+ */
+router.put("/users/friend_requests/accept", acceptFriendRequest); // Accept Friend Request
+
+/**
+ * @swagger
+ * /users/remove_friend:
+ * post:
+ *   summary: Remove Friend
+ *   tags: [Users]
+ */
+router.delete("/users/remove_friend/:userId/:friendId", removeFriend); // Remove friend
+
+/**
+ * @swagger
+ * /users/friend_request/status:
+ * post:
+ *   summary: Remove Friend
+ *   tags: [Users]
+ */
+router.post("/users/friend_requests/status/", getFriendRequestStatus); // Remove friend
+
+/**
+ * @swagger
+ * /users/friend_request/status:
+ * post:
+ *   summary: Remove Friend Request
+ *   tags: [Friend Requests]
+ */
+router.delete("/users/friend_requests/:userId/:friendId", removeFriendRequest); // Remove friend request
 
 export default router;

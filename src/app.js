@@ -10,6 +10,7 @@ import { options } from "./swaggerOptions";
 const specs = swaggerJSDoc(options); // Swagger options
 
 import usersRoutes from "./routes/users";
+import centersRoutes from "./routes/centers";
 
 const app = express();
 
@@ -19,6 +20,8 @@ app.use(express.json()); // Allow the app to understand JSON
 
 // UserRoutes from the file routes/users.js. The app can visit the routes defined in the file users.js ONLY
 app.use(usersRoutes);
+// CentersRoutes from the file routes/centers.js
+app.use(centersRoutes);
 
 // Swagger. Documents the routes
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));

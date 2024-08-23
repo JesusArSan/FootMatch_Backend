@@ -5,8 +5,11 @@ dotenv();
 
 // Use the process.env object to get the values from the .env file and connect to the database
 export const config = {
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_DATABASE || "footmatch",
+	host: process.env.DB_HOST || "localhost",
+	user: process.env.DB_USER || "root",
+	password: process.env.DB_PASSWORD || "",
+	database: process.env.DB_DATABASE || "footmatch",
+	waitForConnections: true,
+	connectionLimit: 10,
+	queueLimit: 0,
 };
