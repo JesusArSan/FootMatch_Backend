@@ -58,7 +58,7 @@ INSERT INTO friends (user_id, friend_id) VALUES (2, 1);
 INSERT INTO friend_requests (sender_id, receiver_id, status) VALUES (1, 3, 'pending');
 
 -------------------------------------------------
--- CENTERS TABLES --
+-- CENTERS TABLE --
 -------------------------------------------------
 CREATE TABLE IF NOT EXISTS centers (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -280,3 +280,43 @@ INSERT INTO favourite_centers (user_id, center_id) VALUES (1, 4);
 INSERT INTO favourite_centers (user_id, center_id) VALUES (2, 5);
 INSERT INTO favourite_centers (user_id, center_id) VALUES (2, 6);
 INSERT INTO favourite_centers (user_id, center_id) VALUES (2, 7);
+
+-------------------------------------------------
+-- TEAMS TABLE --
+-------------------------------------------------
+CREATE TABLE IF NOT EXISTS teams (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    short_name VARCHAR(10) DEFAULT '',
+    logo_url VARCHAR(255) DEFAULT 'https://espndeportes.espn.com/i/teamlogos/soccer/500/default-team-logo-500.png?h=100&w=100',
+    is_custom_team BOOLEAN DEFAULT FALSE, -- Indicates if the team was created by a user
+    created_by_user_id INT, -- References the user who created the custom team
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+-------------------------------------------------
+-- MATCHES TABLE --
+-------------------------------------------------
+CREATE TABLE IF NOT EXISTS matches (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    pitch_id INT NOT NULL, -- References the pitch where the match is played
+    team_a_id INT, -- Team A (can be a custom or auto-generated team)
+    team_b_id INT, -- Team B (same as Team A)
+    team_a_score INT DEFAULT 0,
+    team_b_score INT DEFAULT 0,
+    match_date DATETIME NOT NULL,
+    status ENUM('scheduled', 'completed', 'canceled') DEFAULT 'scheduled',
+    FOREIGN KEY (pitch_id) REFERENCES pitches(id) ON DELETE CASCADE,
+    FOREIGN KEY (team_a_id) REFERENCES teams(id) ON DELETE SET NULL,
+    FOREIGN KEY (team_b_id) REFERENCES teams(id) ON DELETE SET NULL
+);
+-------------------------------------------------
+-- TEAM_PLAYERS TABLE (LINKS TEAMS WITH PLAYERS) --
+-------------------------------------------------
+CREATE TABLE IF NOT EXISTS team_players (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    team_id INT NOT NULL,
+    user_id INT NOT NULL,
+    is_team_leader BOOLEAN DEFAULT FALSE, -- Indicates if the player is the team leader
+    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
