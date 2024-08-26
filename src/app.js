@@ -11,6 +11,7 @@ const specs = swaggerJSDoc(options); // Swagger options
 
 import usersRoutes from "./routes/users.js";
 import centersRoutes from "./routes/centers.js";
+import matchesRoutes from "./routes/matches.js";
 
 const app = express();
 
@@ -22,6 +23,8 @@ app.use(express.json()); // Allow the app to understand JSON
 app.use(usersRoutes);
 // CentersRoutes from the file routes/centers.js
 app.use(centersRoutes);
+// MatchesRoutes from the file routes/matches.js
+app.use(matchesRoutes);
 
 // Swagger. Documents the routes
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));

@@ -180,7 +180,7 @@ export const getPitchOccupancy = async (req, res) => {
 
 		// Query to get the occupancy of a pitch
 		const [rows] = await connection.query(
-			`SELECT * FROM center_occupancies WHERE pitch_id = ?`,
+			`SELECT * FROM pitch_occupancies WHERE pitch_id = ?`,
 			[req.params.pitch_id]
 		);
 
@@ -192,7 +192,7 @@ export const getPitchOccupancy = async (req, res) => {
 	} finally {
 		if (connection) connection.release(); // Release the connection
 	}
-}
+};
 
 ///////////////////////////////////////////////////////////////////
 // Function to set a center as favourite
@@ -217,7 +217,7 @@ export const setFavCenter = async (req, res) => {
 	} finally {
 		if (connection) connection.release(); // Release the connection
 	}
-}
+};
 
 ///////////////////////////////////////////////////////////////////
 // Function to delete a center from favourites
@@ -242,4 +242,4 @@ export const deleteFavCenter = async (req, res) => {
 	} finally {
 		if (connection) connection.release(); // Release the connection
 	}
-}
+};

@@ -1,0 +1,25 @@
+@api = http://localhost:3000/matches
+
+
+# Get all matches from user
+GET {{api}}/1
+###
+
+# Create a new match
+POST {{api}}
+Content-Type: application/json
+
+{
+   "pitchId": 16,
+   "userId": 1,
+   "matchDate": "2024-08-26 10:30"
+}
+###
+
+# Cancel a match
+POST {{api}}/cancel
+Content-Type: application/json
+
+{
+   "matchId": 37
+}
