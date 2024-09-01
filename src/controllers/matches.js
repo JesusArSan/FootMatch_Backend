@@ -103,16 +103,16 @@ export const createMatch = async (req, res) => {
 		// Insert Team A
 		const [teamA] = await connection.query(
 			`INSERT INTO teams (name, short_name, created_by_user_id) VALUES (?, ?, ?)`,
-			[teamAName, teamAShortName, userId, userId]
+			[teamAName, teamAShortName, userId]
 		);
 
 		// Insert Team B. The lider will set after the match is created by the user
 		const [teamB] = await connection.query(
-			`INSERT INTO teams (name, short_name, created_by_user_id) VALUES (?, ?)`,
+			`INSERT INTO teams (name, short_name, created_by_user_id) VALUES (?, ?, ?)`,
 			[teamBName, teamBShortName, userId]
 		);
 
-      // AÑADIR EL LIDER DE LA SALA A LA LISTA DE PARTICIPANTES?????? DEBATIR
+		// AÑADIR EL LIDER DE LA SALA A LA LISTA DE PARTICIPANTES?????? DEBATIR
 
 		// Insert Match
 		const [match] = await connection.query(
