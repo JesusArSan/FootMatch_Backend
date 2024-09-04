@@ -351,28 +351,41 @@ CREATE TABLE IF NOT EXISTS teams (
 CREATE TABLE IF NOT EXISTS matches (
     id INT PRIMARY KEY AUTO_INCREMENT,
     pitch_id INT NOT NULL, -- References the pitch where the match is played
-    team_a_id INT, -- Team A (can be a custom or auto-generated team)
-    team_b_id INT, -- Team B (same as Team A)
+    team_a_id INT, -- References Team A
+    team_b_id INT, -- References Team B
     team_a_score INT DEFAULT 0,
     team_b_score INT DEFAULT 0,
-    match_date DATETIME NOT NULL,
-    status ENUM('scheduled', 'completed', 'canceled') DEFAULT 'scheduled',
+    match_date DATETIME NOT NULL, -- Date and time of the match
+    status ENUM('scheduled', 'completed', 'canceled') DEFAULT 'scheduled', -- Status of the match
     created_by_user_id INT, -- References the user who created the match
     FOREIGN KEY (pitch_id) REFERENCES pitches(id) ON DELETE CASCADE,
     FOREIGN KEY (team_a_id) REFERENCES teams(id) ON DELETE SET NULL,
     FOREIGN KEY (team_b_id) REFERENCES teams(id) ON DELETE SET NULL,
-    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL -- Reference to user
+    FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 -------------------------------------------------
--- TEAM_PLAYERS TABLE (LINKS TEAMS WITH PLAYERS) --
+-- MATCH_INVITATIONS TABLE --
 -------------------------------------------------
-CREATE TABLE IF NOT EXISTS team_players (
+CREATE TABLE IF NOT EXISTS match_invitations (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    team_id INT NOT NULL,
-    user_id INT NOT NULL,
-    is_team_leader BOOLEAN DEFAULT FALSE, -- Indicates if the player is the team leader
-    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+    match_id INT NOT NULL, -- References the match for which the invitation was sent
+    user_id INT NOT NULL, -- References the user who received the invitation
+    status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending', -- Status of the invitation
+    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+-------------------------------------------------
+-- MATCH_PARTICIPANTS TABLE --
+-------------------------------------------------
+CREATE TABLE IF NOT EXISTS match_participants (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    match_id INT NOT NULL, -- References the match the user is participating in
+    user_id INT NOT NULL, -- References the participating user
+    team_id INT, -- References the team the user is in
+    is_leader BOOLEAN DEFAULT FALSE, -- Indicates if the user is the team leader
+    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE SET NULL
 );
 -------------------------------------------------
 -- Matches and teams TABLE DATA --
@@ -390,13 +403,28 @@ VALUES
 (1, 1, 2, 3, 2, '2024-08-26 10:30:00', 'completed', 1), -- Match played between Team A and Team B, created by user with ID 1
 (2, 3, 4, 0, 0, '2024-08-30 17:30:00', 'scheduled', 2), -- Upcoming match between Los Guerreros and The Eagles, created by user with ID 2
 (3, 1, 3, 2, 1, '2024-09-05 15:30:00', 'completed', 1); -- Match played between Team A and Los Guerreros, created by user with ID 1
--- Insert data into team_players table
-INSERT INTO team_players (team_id, user_id, is_team_leader)
+-- Insert data into match_participants table
+INSERT INTO match_participants (match_id, user_id, team_id, is_leader)
 VALUES 
-(1, 1, TRUE), -- User 1 is the leader of Team A
-(1, 3, FALSE), -- User 3 is a player in Team A
-(2, 2, TRUE), -- User 2 is the leader of Team B
-(3, 4, TRUE), -- User 4 is the leader of Los Guerreros
-(3, 5, FALSE), -- User 5 is a player in Los Guerreros
-(4, 6, TRUE), -- User 6 is the leader of The Eagles
-(4, 7, FALSE); -- User 7 is a player in The Eagles
+-- Participants in Match 1 (Team A vs Team B)
+(1, 1, 1, TRUE), -- User 1 is the leader of Team A in Match 1
+(1, 3, 1, FALSE), -- User 3 is a player in Team A in Match 1
+(1, 2, 2, TRUE), -- User 2 is the leader of Team B in Match 1
+
+-- Participants in Match 2 (Los Guerreros vs The Eagles)
+(2, 4, 3, TRUE), -- User 4 is the leader of Los Guerreros in Match 2
+(2, 5, 3, FALSE), -- User 5 is a player in Los Guerreros in Match 2
+(2, 6, 4, TRUE), -- User 6 is the leader of The Eagles in Match 2
+(2, 7, 4, FALSE), -- User 7 is a player in The Eagles in Match 2
+
+-- Participants in Match 3 (Team A vs Los Guerreros)
+(3, 1, 1, TRUE), -- User 1 is the leader of Team A in Match 3
+(3, 4, 3, TRUE), -- User 4 is the leader of Los Guerreros in Match 3
+
+-- Participants in Match 4 (Dragons FC vs Thunderbolts)
+(4, 3, 5, TRUE), -- User 3 is the leader of Dragons FC in Match 4
+(4, 2, 6, TRUE), -- User 2 is the leader of Thunderbolts in Match 4
+
+-- Participants in Match 5 (Los Guerreros vs Thunderbolts)
+(5, 4, 3, TRUE), -- User 4 is the leader of Los Guerreros in Match 5
+(5, 2, 6, TRUE); -- User 2 is the leader of Thunderbolts in Match 5

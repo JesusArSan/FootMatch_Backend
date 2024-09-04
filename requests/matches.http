@@ -21,5 +21,5 @@ POST {{api}}/cancel
 Content-Type: application/json
 
 {
-   "matchId": 37
+   "matchId": 4
 }
