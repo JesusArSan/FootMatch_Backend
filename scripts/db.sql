@@ -394,9 +394,9 @@ CREATE TABLE IF NOT EXISTS match_participants (
 INSERT INTO teams (name, short_name, logo_url, is_custom_team, created_by_user_id)
 VALUES 
 ('Team A', 'TMA', 'https://espndeportes.espn.com/i/teamlogos/soccer/500/default-team-logo-500.png?h=100&w=100', FALSE, NULL),
-('Team B', 'TMB', 'https://espndeportes.espn.com/i/teamlogos/soccer/500/default-team-logo-500.png?h=100&w=100', FALSE, NULL),
-('Los Guerreros', 'LG', 'https://example.com/logos/los-guerreros.png', TRUE, 1), -- Custom team created by user with ID 1
-('The Eagles', 'TE', 'https://example.com/logos/the-eagles.png', TRUE, 2); -- Custom team created by user with ID 2
+('Team B', 'TMB', 'https://b.fssta.com/uploads/application/soccer/team-logos/Placeholder.vresize.250.250.medium.0.png', FALSE, NULL),
+('Los Guerreros', 'LG', 'https://static.wikia.nocookie.net/liga-mx/images/0/06/GREYlogo.png/revision/latest?cb=20210731185035&path-prefix=es', TRUE, 1), -- Custom team created by user with ID 1
+('The Eagles', 'TE', 'https://e7.pngegg.com/pngimages/918/693/png-clipart-2018-philadelphia-eagles-season-super-bowl-lii-new-england-patriots-nfl-philadelphia-eagles-emblem-label-thumbnail.png', TRUE, 2); -- Custom team created by user with ID 2
 -- Insert data into matches table
 INSERT INTO matches (pitch_id, team_a_id, team_b_id, team_a_score, team_b_score, match_date, status, created_by_user_id)
 VALUES 
@@ -405,11 +405,13 @@ VALUES
 (3, 1, 3, 2, 1, '2024-09-05 15:30:00', 'completed', 1); -- Match played between Team A and Los Guerreros, created by user with ID 1
 -- Insert data into match_participants table
 INSERT INTO match_participants (match_id, user_id, team_id, is_leader)
-VALUES 
+VALUES
 -- Participants in Match 1 (Team A vs Team B)
 (1, 1, 1, TRUE), -- User 1 is the leader of Team A in Match 1
 (1, 3, 1, FALSE), -- User 3 is a player in Team A in Match 1
 (1, 2, 2, TRUE), -- User 2 is the leader of Team B in Match 1
+
+(2, 1, 2, false),
 
 -- Participants in Match 2 (Los Guerreros vs The Eagles)
 (2, 4, 3, TRUE), -- User 4 is the leader of Los Guerreros in Match 2
@@ -419,12 +421,4 @@ VALUES
 
 -- Participants in Match 3 (Team A vs Los Guerreros)
 (3, 1, 1, TRUE), -- User 1 is the leader of Team A in Match 3
-(3, 4, 3, TRUE), -- User 4 is the leader of Los Guerreros in Match 3
-
--- Participants in Match 4 (Dragons FC vs Thunderbolts)
-(4, 3, 5, TRUE), -- User 3 is the leader of Dragons FC in Match 4
-(4, 2, 6, TRUE), -- User 2 is the leader of Thunderbolts in Match 4
-
--- Participants in Match 5 (Los Guerreros vs Thunderbolts)
-(5, 4, 3, TRUE), -- User 4 is the leader of Los Guerreros in Match 5
-(5, 2, 6, TRUE); -- User 2 is the leader of Thunderbolts in Match 5
+(3, 4, 3, TRUE); -- User 4 is the leader of Los Guerreros in Match 3

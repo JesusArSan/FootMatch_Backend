@@ -2,7 +2,7 @@
 
 
 # Get all matches from user
-GET {{api}}/1
+GET {{api}}/2
 ###
 
 # Create a new match
@@ -10,9 +10,9 @@ POST {{api}}
 Content-Type: application/json
 
 {
-   "pitchId": 16,
+   "pitchId": 1,
    "userId": 1,
-   "matchDate": "2024-08-26 10:30"
+   "matchDate": "2024-09-04 10:30"
 }
 ###
 
@@ -23,3 +23,18 @@ Content-Type: application/json
 {
    "matchId": 4
 }
+###
+
+# Get all participants from a match
+GET {{api}}/participants/1
+###
+
+# # Add a participant to a match
+# POST {{api}}/participants
+# Content-Type: application/json
+
+# {
+#    "matchId": 1,
+#    "userId": 1
+# }
+# ###
