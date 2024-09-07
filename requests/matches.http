@@ -2,7 +2,7 @@
 
 
 # Get all matches from user
-GET {{api}}/2
+GET {{api}}/user/2
 ###
 
 # Create a new match
@@ -27,6 +27,10 @@ Content-Type: application/json
 
 # Get all participants from a match
 GET {{api}}/participants/1
+###
+
+# Get match by id
+GET {{api}}/37
 ###
 
 # # Add a participant to a match

@@ -86,6 +86,65 @@ export const getCenters = async (req, res) => {
 };
 
 ///////////////////////////////////////////////////////////////////
+// Function to get the info of center by pitch
+//
+export const getCenterByPitch = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Query to get the info of center by pitch
+		const [rows] = await connection.query(
+			`SELECT c.*, 
+			        ci.id AS image_id, 
+			        ci.uri AS image_uri, 
+			        p.id AS pitch_id, 
+			        p.type AS pitch_type, 
+			        p.surface, 
+			        p.status 
+			FROM centers c
+			LEFT JOIN center_images ci ON c.id = ci.center_id
+			LEFT JOIN pitches p ON c.id = p.center_id
+			WHERE p.id = ?`,
+			[req.params.pitch_id]
+		);
+
+		// If no center is found, return an empty response
+		if (rows.length === 0) {
+			return res
+				.status(404)
+				.json({ message: "Center not found for this pitch." });
+		}
+
+		// Extract the center info (since there's only one center per pitch)
+		const center = {
+			id: rows[0].id,
+			name: rows[0].name,
+			address: rows[0].address,
+			// Add other relevant center fields
+			images: rows
+				.filter((row) => row.image_id)
+				.map((row) => ({ id: row.image_id, uri: row.image_uri })),
+			pitch: {
+				id: rows[0].pitch_id,
+				type: rows[0].pitch_type,
+				surface: rows[0].surface,
+				status: rows[0].status,
+			},
+		};
+
+		// Send the structured response
+		res.json(center);
+	} catch (error) {
+		console.error("Error getting center by pitch:", error);
+		res.status(500).json({ message: "Error getting center by pitch." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
 // Function to get the info of favourite centers
 //
 export const getFavCenters = async (req, res) => {

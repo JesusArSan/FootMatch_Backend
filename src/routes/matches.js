@@ -5,6 +5,7 @@ import {
 	createMatch,
 	cancelMatch,
 	getMatchParticipants,
+	getMatchById,
 } from "../controllers/matches.js";
 
 const router = Router();
@@ -36,7 +37,7 @@ const router = Router();
  *      500:
  *        description: Server error
  */
-router.get("/matches/:user_id", getMatches); // Obtain all matches from a user
+router.get("/matches/user/:user_id", getMatches); // Obtain all matches from a user
 
 /**
  * @swagger
@@ -121,5 +122,29 @@ router.post("/matches/cancel", cancelMatch); // Route to cancel a match
  *        description: Server error
  */
 router.get("/matches/participants/:match_id", getMatchParticipants); // Route to get the participants of a match
+
+// Get match by id
+
+/**
+ * @swagger
+ * /matches:
+ *   get:
+ *     summary: Get match by id
+ *     tags:
+ *       - matches
+ *     parameters:
+ *       - in: path
+ *         name: match_id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the match
+ *     responses:
+ *       200:
+ *         description: Match found
+ *       500:
+ *         description: Server error
+ */
+router.get("/matches/:matchId", getMatchById); // Obtain match by id
 
 export default router;

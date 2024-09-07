@@ -63,6 +63,40 @@ export const getMatches = async (req, res) => {
 };
 
 ///////////////////////////////////////////////////////////////////
+// Get Match by ID
+//
+export const getMatchById = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Match ID from request parameters
+		const matchId = req.params.matchId;
+
+		// Query to get the match details
+		const [match] = await connection.query(
+			`SELECT m.*,
+					team_a.name AS team_a_name, team_a.logo_url AS team_a_logo, team_a.created_at AS team_a_created_at,
+					team_b.name AS team_b_name, team_b.logo_url AS team_b_logo, team_b.created_at AS team_b_created_at
+				FROM matches m
+				LEFT JOIN teams team_a ON m.team_a_id = team_a.id
+				LEFT JOIN teams team_b ON m.team_b_id = team_b.id
+				WHERE m.id = ?`,
+			[matchId]
+		);
+
+		// Send the structured response
+		res.json(match[0]);
+	} catch (error) {
+		console.error("Error getting match by ID:", error);
+		res.status(500).json({ message: "Error getting match by ID." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
 // Function to create a match
 //
 export const createMatch = async (req, res) => {

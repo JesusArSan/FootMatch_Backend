@@ -2,6 +2,7 @@
 import { Router } from "express";
 import {
 	getCenters,
+	getCenterByPitch,
 	getFavCenters,
 	getPitchOccupancy,
 	setFavCenter,
@@ -30,6 +31,15 @@ router.get("/centers", getCenters); // Obtain all centers
 /**
  * @swagger
  * /Centers:
+ * get:
+ * summary: Get center info by number of pitch
+ * tags: [Centers]
+ */
+router.get("/centers/pitch/:pitch_id", getCenterByPitch); // Obtain center by pitch
+
+/**
+ * @swagger
+ * /Centers:
  *  get:
  *    summary: Get all fav Centers from user
  *    tags: [Centers]
@@ -43,7 +53,7 @@ router.get("/centers/:user_id", getFavCenters); // Obtain all fav centers
  *    summary: Get occupancy of a pitch
  *    tags: [Centers]
  */
-router.get("/centers/pitch/:pitch_id", getPitchOccupancy); // Obtain all fav centers
+router.get("/centers/pitch_occupancies/:pitch_id", getPitchOccupancy); // Obtain all fav centers
 
 /**
  * @swagger

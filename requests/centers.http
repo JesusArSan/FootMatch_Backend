@@ -10,7 +10,7 @@ GET {{api}}/1
 ###
 
 # Get Pitch Occupancy
-GET {{api}}/pitch/1
+GET {{api}}/pitch_occupancies/3
 ###
 
 # Add center to fav user list
@@ -31,4 +31,8 @@ Content-Type: application/json
    "user_id": 1,
    "center_id": 7
 }
+###
+
+# Get center info from pitch id
+GET {{api}}/pitch/1
 ###
