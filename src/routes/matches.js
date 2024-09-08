@@ -6,6 +6,8 @@ import {
 	cancelMatch,
 	getMatchParticipants,
 	getMatchById,
+	addMatchParticipant,
+	deleteMatchParticipant,
 } from "../controllers/matches.js";
 
 const router = Router();
@@ -146,5 +148,40 @@ router.get("/matches/participants/:match_id", getMatchParticipants); // Route to
  *         description: Server error
  */
 router.get("/matches/:matchId", getMatchById); // Obtain match by id
+
+/**
+ * @swagger
+ * /matches/participants:
+ *   post:
+ *     summary: Add a participant to a match
+ *     tags:
+ *       - matches
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - matchId
+ *               - userId
+ *             properties:
+ *               matchId:
+ *                 type: integer
+ *                 description: The ID of the match
+ *               userId:
+ *                 type: integer
+ *                 description: The ID of the user to add as a participant
+ *     responses:
+ *       201:
+ *         description: Participant added successfully
+ *       400:
+ *         description: Participant already exists
+ *       500:
+ *         description: Server error
+ */
+router.post("/matches/participants", addMatchParticipant); // Route to add participant to a match
+
+router.delete("/matches/participants", deleteMatchParticipant); // Route to delete participant from a match
 
 export default router;

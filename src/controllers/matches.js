@@ -302,3 +302,105 @@ export const getMatchParticipants = async (req, res) => {
 		if (connection) connection.release(); // Release the connection
 	}
 };
+
+// Add participant to a match
+export const addMatchParticipant = async (req, res) => {
+	let connection;
+	try {
+		// Extracting data from request body
+		const { matchId, userId } = req.body;
+
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Check if the user exists
+		const [user] = await connection.query(
+			"SELECT id FROM users WHERE id = ?",
+			[userId]
+		);
+		if (user.length === 0) {
+			return res.status(404).json({ message: "User does not exist." });
+		}
+
+		// Check if the match exists
+		const [match] = await connection.query(
+			"SELECT id FROM matches WHERE id = ?",
+			[matchId]
+		);
+		if (match.length === 0) {
+			return res.status(404).json({ message: "Match does not exist." });
+		}
+
+		// Check if the user is already a participant in the match
+		const [existingParticipant] = await connection.query(
+			"SELECT id FROM match_participants WHERE match_id = ? AND user_id = ?",
+			[matchId, userId]
+		);
+		if (existingParticipant.length > 0) {
+			return res.status(400).json({
+				message: "User is already a participant in the match.",
+			});
+		}
+
+		// Insert the participant in match_participants with team_id as NULL
+		const [insertResult] = await connection.query(
+			"INSERT INTO match_participants (match_id, user_id, team_id) VALUES (?, ?, NULL)",
+			[matchId, userId]
+		);
+
+		// Send the success response with participant details
+		res.status(201).json({
+			message: "Participant added successfully",
+			participant: {
+				matchId,
+				userId,
+				participantId: insertResult.insertId,
+				teamId: null,
+			},
+		});
+	} catch (error) {
+		console.error("Error adding participant to match:", error);
+		res.status(500).json({ message: "Error adding participant to match." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+// Remove participant from a match
+export const deleteMatchParticipant = async (req, res) => {
+	let connection;
+	try {
+		// Extract matchId and userId from the request body
+		const { matchId, userId } = req.body;
+
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Check if the participant exists in the match
+		const [participant] = await connection.query(
+			"SELECT id FROM match_participants WHERE match_id = ? AND user_id = ?",
+			[matchId, userId]
+		);
+		if (participant.length === 0) {
+			return res
+				.status(404)
+				.json({ message: "Participant not found in the match." });
+		}
+
+		// Delete the participant from the match
+		await connection.query(
+			"DELETE FROM match_participants WHERE match_id = ? AND user_id = ?",
+			[matchId, userId]
+		);
+
+		// Send a success response
+		res.status(200).json({ message: "Participant removed successfully." });
+	} catch (error) {
+		console.error("Error removing participant from match:", error);
+		res.status(500).json({
+			message: "Error removing participant from match.",
+		});
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};

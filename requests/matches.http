@@ -21,7 +21,7 @@ POST {{api}}/cancel
 Content-Type: application/json
 
 {
-   "matchId": 4
+   "matchId": 37
 }
 ###
 
@@ -33,12 +33,22 @@ GET {{api}}/participants/1
 GET {{api}}/37
 ###
 
-# # Add a participant to a match
-# POST {{api}}/participants
-# Content-Type: application/json
+# Add a participant to a match
+POST {{api}}/participants
+Content-Type: application/json
 
-# {
-#    "matchId": 1,
-#    "userId": 1
-# }
-# ###
+{
+   "matchId": 39,
+   "userId": 1
+}
+###
+
+# Remove a participant from a match
+DELETE {{api}}/participants
+Content-Type: application/json
+
+{
+   "matchId": 39,
+   "userId": 1
+}
+###
