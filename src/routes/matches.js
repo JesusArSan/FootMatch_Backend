@@ -182,6 +182,37 @@ router.get("/matches/:matchId", getMatchById); // Obtain match by id
  */
 router.post("/matches/participants", addMatchParticipant); // Route to add participant to a match
 
+/**
+ * @swagger
+ * /matches/participants:
+ *   delete:
+ *     summary: Delete a participant from a match
+ *     tags:
+ *       - matches
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - matchId
+ *               - userId
+ *             properties:
+ *               matchId:
+ *                 type: integer
+ *                 description: The ID of the match
+ *               userId:
+ *                 type: integer
+ *                 description: The ID of the user to delete as a participant
+ *     responses:
+ *       200:
+ *         description: Participant deleted successfully
+ *       400:
+ *         description: Participant does not exist
+ *       500:
+ *         description: Server error
+ */
 router.delete("/matches/participants", deleteMatchParticipant); // Route to delete participant from a match
 
 export default router;
