@@ -52,3 +52,29 @@ Content-Type: application/json
    "userId": 1
 }
 ###
+
+# Get all invitations from a match
+GET {{api}}/invitations/35
+###
+
+# Add an invitation for user 2 to match 35
+POST {{api}}/invitations
+Content-Type: application/json
+
+{
+    "matchId": 35,
+    "userId": 3
+}
+###
+
+# Delete an invitation 
+DELETE {{api}}/invitations/35/3
+###
+
+# Accept an invitation
+PUT {{api}}/invitations/accept/35/3
+###
+
+# Reject an invitation
+PUT {{api}}/invitations/reject/35/3
+###

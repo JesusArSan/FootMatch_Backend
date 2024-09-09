@@ -8,6 +8,11 @@ import {
 	getMatchById,
 	addMatchParticipant,
 	deleteMatchParticipant,
+	getMatchInvitations,
+	addMatchInvitation,
+	deleteMatchInvitation,
+	acceptMatchInvitation,
+	rejectMatchInvitation,
 } from "../controllers/matches.js";
 
 const router = Router();
@@ -107,29 +112,6 @@ router.post("/matches/cancel", cancelMatch); // Route to cancel a match
 /**
  * @swagger
  * /matches:
- *  get:
- *    summary: Get the participants of a match
- *    tags: [matches]
- *    parameters:
- *      - in: path
- *        name: match_id
- *        schema:
- *          type: integer
- *        required: true
- *        description: The ID of the match
- *    responses:
- *      200:
- *        description: List of participants
- *      500:
- *        description: Server error
- */
-router.get("/matches/participants/:match_id", getMatchParticipants); // Route to get the participants of a match
-
-// Get match by id
-
-/**
- * @swagger
- * /matches:
  *   get:
  *     summary: Get match by id
  *     tags:
@@ -148,6 +130,27 @@ router.get("/matches/participants/:match_id", getMatchParticipants); // Route to
  *         description: Server error
  */
 router.get("/matches/:matchId", getMatchById); // Obtain match by id
+
+/**
+ * @swagger
+ * /matches:
+ *  get:
+ *    summary: Get the participants of a match
+ *    tags: [matches]
+ *    parameters:
+ *      - in: path
+ *        name: match_id
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: The ID of the match
+ *    responses:
+ *      200:
+ *        description: List of participants
+ *      500:
+ *        description: Server error
+ */
+router.get("/matches/participants/:match_id", getMatchParticipants); // Route to get the participants of a match
 
 /**
  * @swagger
@@ -214,5 +217,151 @@ router.post("/matches/participants", addMatchParticipant); // Route to add parti
  *         description: Server error
  */
 router.delete("/matches/participants", deleteMatchParticipant); // Route to delete participant from a match
+
+/**
+ * @swagger
+ * /matches/invitations/{match_id}:
+ *  get:
+ *    summary: Get the invitations of a match
+ *    tags: [matches]
+ *    parameters:
+ *      - in: path
+ *        name: match_id
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: The ID of the match
+ *    responses:
+ *      200:
+ *        description: List of invitations
+ *      500:
+ *        description: Server error
+ */
+router.get("/matches/invitations/:match_id", getMatchInvitations); // Route to get invitations of a match
+
+/**
+ * @swagger
+ * /matches/invitations:
+ *  post:
+ *    summary: Add an invitation for a user to a match
+ *    tags: [matches]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              matchId:
+ *                type: integer
+ *                description: The ID of the match
+ *              userId:
+ *                type: integer
+ *                description: The ID of the user to invite
+ *            required:
+ *              - matchId
+ *              - userId
+ *    responses:
+ *      201:
+ *        description: Invitation sent successfully
+ *      400:
+ *        description: User or match does not exist, or invitation already exists
+ *      500:
+ *        description: Server error
+ */
+router.post("/matches/invitations", addMatchInvitation);
+
+/**
+ * @swagger
+ * /matches/invitations/{matchId}/{userId}:
+ *  delete:
+ *    summary: Delete an invitation for a user to a match
+ *    tags: [matches]
+ *    parameters:
+ *      - in: path
+ *        name: matchId
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: The ID of the match
+ *      - in: path
+ *        name: userId
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: The ID of the user whose invitation will be deleted
+ *    responses:
+ *      200:
+ *        description: Invitation deleted successfully
+ *      400:
+ *        description: Invitation does not exist
+ *      500:
+ *        description: Server error
+ */
+router.delete("/matches/invitations/:matchId/:userId", deleteMatchInvitation);
+
+/**
+ * @swagger
+ * /matches/invitations/accept/{matchId}/{userId}:
+ *  put:
+ *    summary: Accept an invitation to a match
+ *    tags: [matches]
+ *    parameters:
+ *      - in: path
+ *        name: matchId
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: The ID of the match
+ *      - in: path
+ *        name: userId
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: The ID of the user
+ *    responses:
+ *      200:
+ *        description: Invitation accepted successfully
+ *      400:
+ *        description: Invitation does not exist
+ *      500:
+ *        description: Server error
+ */
+router.put(
+	"/matches/invitations/accept/:matchId/:userId",
+	acceptMatchInvitation
+);
+
+/**
+ * @swagger
+ * /matches/invitations/reject/{matchId}/{userId}:
+ *  put:
+ *    summary: Reject an invitation to a match
+ *    tags: [matches]
+ *    parameters:
+ *      - in: path
+ *        name: matchId
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: The ID of the match
+ *      - in: path
+ *        name: userId
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: The ID of the user
+ *    responses:
+ *      200:
+ *        description: Invitation rejected successfully
+ *      400:
+ *        description: Invitation does not exist
+ *      500:
+ *        description: Server error
+ */
+router.put(
+	"/matches/invitations/reject/:matchId/:userId",
+	rejectMatchInvitation
+);
 
 export default router;

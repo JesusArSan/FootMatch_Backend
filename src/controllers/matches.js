@@ -404,3 +404,245 @@ export const deleteMatchParticipant = async (req, res) => {
 		if (connection) connection.release(); // Release the connection
 	}
 };
+
+///////////////////////////////////////////////////////////////////
+// Function to get invitations of a match
+//
+export const getMatchInvitations = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Match ID from request parameters
+		const matchId = req.params.match_id;
+
+		// Get the invitations of the match
+		const [invitations] = await connection.query(
+			`SELECT u.id, u.username, u.email, u.photo, mi.status 
+											FROM users u 
+											INNER JOIN match_invitations mi 
+											ON u.id = mi.user_id 
+											WHERE mi.match_id = ?`,
+			[matchId]
+		);
+
+		// Send the response with the invitations
+		res.json(invitations);
+	} catch (error) {
+		console.error("Error getting match invitations:", error);
+		res.status(500).json({ message: "Error getting match invitations." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Function to add an invitation to a match
+//
+export const addMatchInvitation = async (req, res) => {
+	let connection;
+	try {
+		// Get matchId and userId from request body
+		const { matchId, userId } = req.body;
+
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Check if the user exists
+		const [user] = await connection.query(
+			"SELECT id FROM users WHERE id = ?",
+			[userId]
+		);
+		if (user.length === 0) {
+			throw new Error("User does not exist.");
+		}
+
+		// Check if the match exists
+		const [match] = await connection.query(
+			"SELECT id FROM matches WHERE id = ?",
+			[matchId]
+		);
+		if (match.length === 0) {
+			throw new Error("Match does not exist.");
+		}
+
+		// Check if the invitation already exists
+		const [existingInvitation] = await connection.query(
+			"SELECT id FROM match_invitations WHERE match_id = ? AND user_id = ?",
+			[matchId, userId]
+		);
+		if (existingInvitation.length > 0) {
+			throw new Error("Invitation already exists for this user.");
+		}
+
+		// Insert the invitation with status 'pending'
+		await connection.query(
+			"INSERT INTO match_invitations (match_id, user_id, status) VALUES (?, ?, 'pending')",
+			[matchId, userId]
+		);
+
+		// Send the response
+		res.status(201).json({
+			message: "Invitation sent successfully",
+			matchId: matchId,
+			userId: userId,
+		});
+	} catch (error) {
+		// Handle specific errors
+		if (error.message === "User does not exist.") {
+			res.status(400).json({ message: "User does not exist." });
+		} else if (error.message === "Match does not exist.") {
+			res.status(400).json({ message: "Match does not exist." });
+		} else if (error.message === "Invitation already exists for this user.") {
+			res.status(400).json({
+				message: "Invitation already exists for this user.",
+			});
+		} else {
+			console.error("Error adding invitation to match:", error);
+			res.status(500).json({ message: "Error adding invitation to match." });
+		}
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Function to delete an invitation to a match
+//
+export const deleteMatchInvitation = async (req, res) => {
+	let connection;
+	try {
+		// Get matchId and userId from request body or params
+		const { matchId, userId } = req.params;
+
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Check if the invitation exists
+		const [invitation] = await connection.query(
+			"SELECT id FROM match_invitations WHERE match_id = ? AND user_id = ?",
+			[matchId, userId]
+		);
+		if (invitation.length === 0) {
+			throw new Error("Invitation does not exist.");
+		}
+
+		// Delete the invitation
+		await connection.query(
+			"DELETE FROM match_invitations WHERE match_id = ? AND user_id = ?",
+			[matchId, userId]
+		);
+
+		// Send the response
+		res.status(200).json({
+			message: "Invitation deleted successfully",
+			matchId: matchId,
+			userId: userId,
+		});
+	} catch (error) {
+		// Handle specific errors
+		if (error.message === "Invitation does not exist.") {
+			res.status(400).json({ message: "Invitation does not exist." });
+		} else {
+			console.error("Error deleting invitation from match:", error);
+			res.status(500).json({
+				message: "Error deleting invitation from match.",
+			});
+		}
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Function to accept an invitation to a match
+//
+export const acceptMatchInvitation = async (req, res) => {
+	let connection;
+	try {
+		// Get matchId and userId from request params
+		const { matchId, userId } = req.params;
+
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Check if the invitation exists
+		const [invitation] = await connection.query(
+			"SELECT id FROM match_invitations WHERE match_id = ? AND user_id = ?",
+			[matchId, userId]
+		);
+		if (invitation.length === 0) {
+			throw new Error("Invitation does not exist.");
+		}
+
+		// Update the invitation status to 'accepted'
+		await connection.query(
+			"UPDATE match_invitations SET status = 'accepted' WHERE match_id = ? AND user_id = ?",
+			[matchId, userId]
+		);
+
+		// Send the response
+		res.status(200).json({
+			message: "Invitation accepted successfully",
+			matchId: matchId,
+			userId: userId,
+		});
+	} catch (error) {
+		// Handle specific errors
+		if (error.message === "Invitation does not exist.") {
+			res.status(400).json({ message: "Invitation does not exist." });
+		} else {
+			console.error("Error accepting invitation:", error);
+			res.status(500).json({ message: "Error accepting invitation." });
+		}
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Function to reject an invitation to a match
+//
+export const rejectMatchInvitation = async (req, res) => {
+	let connection;
+	try {
+		// Get matchId and userId from request params
+		const { matchId, userId } = req.params;
+
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Check if the invitation exists
+		const [invitation] = await connection.query(
+			"SELECT id FROM match_invitations WHERE match_id = ? AND user_id = ?",
+			[matchId, userId]
+		);
+		if (invitation.length === 0) {
+			throw new Error("Invitation does not exist.");
+		}
+
+		// Update the invitation status to 'rejected'
+		await connection.query(
+			"UPDATE match_invitations SET status = 'rejected' WHERE match_id = ? AND user_id = ?",
+			[matchId, userId]
+		);
+
+		// Send the response
+		res.status(200).json({
+			message: "Invitation rejected successfully",
+			matchId: matchId,
+			userId: userId,
+		});
+	} catch (error) {
+		// Handle specific errors
+		if (error.message === "Invitation does not exist.") {
+			res.status(400).json({ message: "Invitation does not exist." });
+		} else {
+			console.error("Error rejecting invitation:", error);
+			res.status(500).json({ message: "Error rejecting invitation." });
+		}
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
