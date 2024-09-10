@@ -78,3 +78,6 @@ PUT {{api}}/invitations/accept/35/3
 # Reject an invitation
 PUT {{api}}/invitations/reject/35/3
 ###
+
+# Get all matches from user and status
+GET {{api}}/status/1/c

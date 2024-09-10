@@ -13,6 +13,7 @@ import {
 	deleteMatchInvitation,
 	acceptMatchInvitation,
 	rejectMatchInvitation,
+	getMatchesByStatus,
 } from "../controllers/matches.js";
 
 const router = Router();
@@ -45,6 +46,25 @@ const router = Router();
  *        description: Server error
  */
 router.get("/matches/user/:user_id", getMatches); // Obtain all matches from a user
+
+/**
+ * @swagger
+ * /matches/status/{status}:
+ *   get:
+ *     summary: Get all matches from a user by status
+ *     tags: [matches]
+ *     parameters:
+ *       - in: path
+ *         name: status
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The status of the match
+ *     responses:
+ *       200:
+ *         description: List of matches
+ */
+router.get("/matches/status/:user_id/:status", getMatchesByStatus); // Obtain all matches from a user by status
 
 /**
  * @swagger

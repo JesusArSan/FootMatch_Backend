@@ -63,6 +63,66 @@ export const getMatches = async (req, res) => {
 };
 
 ///////////////////////////////////////////////////////////////////
+// Function to get all matches from a user
+//
+export const getMatchesByStatus = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// User ID from request parameters
+		const userId = req.params.user_id;
+		const status = req.params.status;
+
+		// Query to get matches where the user is the creator of the match
+		const [matchesAsCreator] = await connection.query(
+			`SELECT m.*,
+					team_a.name AS team_a_name, team_a.logo_url AS team_a_logo, team_a.created_at AS team_a_created_at,
+					team_b.name AS team_b_name, team_b.logo_url AS team_b_logo, team_b.created_at AS team_b_created_at
+				FROM matches m
+				LEFT JOIN teams team_a ON m.team_a_id = team_a.id
+				LEFT JOIN teams team_b ON m.team_b_id = team_b.id
+				WHERE m.created_by_user_id = ?
+				AND m.status = ?
+				ORDER BY team_a.created_at ASC, team_b.created_at ASC`,
+			[userId, status]
+		);
+
+		// Query to get matches where the user is a participant in either team
+		const [matchesAsPlayer] = await connection.query(
+			`SELECT m.*,
+					team_a.name AS team_a_name, team_a.logo_url AS team_a_logo, team_a.created_at AS team_a_created_at,
+					team_b.name AS team_b_name, team_b.logo_url AS team_b_logo, team_b.created_at AS team_b_created_at
+				FROM matches m
+				LEFT JOIN teams team_a ON m.team_a_id = team_a.id
+				LEFT JOIN teams team_b ON m.team_b_id = team_b.id
+				JOIN match_participants mp ON m.id = mp.match_id
+				WHERE mp.user_id = ?
+				AND m.status = ?
+				ORDER BY team_a.created_at ASC, team_b.created_at ASC`,
+			[userId, status]
+		);
+
+		// Combine results and remove duplicates (in case the user is both the creator and a player in the same match)
+		const combinedMatches = [
+			...matchesAsCreator,
+			...matchesAsPlayer.filter(
+				(match) => !matchesAsCreator.some((m) => m.id === match.id)
+			),
+		];
+
+		// Send the structured response
+		res.json(combinedMatches);
+	} catch (error) {
+		console.error("Error getting matches:", error);
+		res.status(500).json({ message: "Error getting matches." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
 // Get Match by ID
 //
 export const getMatchById = async (req, res) => {
