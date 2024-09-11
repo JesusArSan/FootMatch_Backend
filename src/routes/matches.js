@@ -14,6 +14,7 @@ import {
 	acceptMatchInvitation,
 	rejectMatchInvitation,
 	getMatchesByStatus,
+	getUserMatchInvitations,
 } from "../controllers/matches.js";
 
 const router = Router();
@@ -257,7 +258,7 @@ router.delete("/matches/participants", deleteMatchParticipant); // Route to dele
  *      500:
  *        description: Server error
  */
-router.get("/matches/invitations/:match_id", getMatchInvitations); // Route to get invitations of a match
+router.get("/matches/invitations/match/:match_id", getMatchInvitations); // Route to get invitations of a match
 
 /**
  * @swagger
@@ -383,5 +384,32 @@ router.put(
 	"/matches/invitations/reject/:matchId/:userId",
 	rejectMatchInvitation
 );
+
+/**
+ * @swagger
+ * /matches/invitations/{user_id}/{status}:
+ *   get:
+ *     summary: Get all match invitations for a user by status
+ *     tags: [matches]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the user
+ *       - in: path
+ *         name: status
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The status of the invitations (pending, accepted, rejected)
+ *     responses:
+ *       200:
+ *         description: List of match invitations with match details
+ *       500:
+ *         description: Server error
+ */
+router.get("/matches/invitations/:user_id/:status", getUserMatchInvitations); // Route to get user match invitations by status
 
 export default router;

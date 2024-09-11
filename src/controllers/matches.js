@@ -63,6 +63,41 @@ export const getMatches = async (req, res) => {
 };
 
 ///////////////////////////////////////////////////////////////////
+// Function to get all match invitations for a user by status
+//
+export const getUserMatchInvitations = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Extract user_id and status from request parameters
+		const { user_id, status } = req.params;
+
+		// Query to get all matches where the user has been invited and match them with status
+		const [matches] = await connection.query(
+			`SELECT m.*, 
+			        team_a.name AS team_a_name, team_a.logo_url AS team_a_logo, team_a.created_at AS team_a_created_at,
+			        team_b.name AS team_b_name, team_b.logo_url AS team_b_logo, team_b.created_at AS team_b_created_at
+			 FROM match_invitations mi
+			 JOIN matches m ON mi.match_id = m.id
+			 LEFT JOIN teams team_a ON m.team_a_id = team_a.id
+			 LEFT JOIN teams team_b ON m.team_b_id = team_b.id
+			 WHERE mi.user_id = ? AND mi.status = ?`,
+			[user_id, status]
+		);
+
+		// Send the response with the matches data only
+		res.json(matches);
+	} catch (error) {
+		console.error("Error getting match invitations:", error);
+		res.status(500).json({ message: "Error getting match invitations." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
 // Function to get all matches from a user
 //
 export const getMatchesByStatus = async (req, res) => {

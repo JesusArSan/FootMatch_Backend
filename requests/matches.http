@@ -29,8 +29,12 @@ Content-Type: application/json
 GET {{api}}/participants/1
 ###
 
-# Get match by id
-GET {{api}}/37
+# Get match deatils from match id
+GET {{api}}/35
+###
+
+# Get all matches from user and status
+GET {{api}}/status/1/completed
 ###
 
 # Add a participant to a match
@@ -54,7 +58,11 @@ Content-Type: application/json
 ###
 
 # Get all invitations from a match
-GET {{api}}/invitations/35
+GET {{api}}/invitations/match/35
+###
+
+# Get all match invitations for a user by status
+GET {{api}}/invitations/2/pending
 ###
 
 # Add an invitation for user 2 to match 35
@@ -78,6 +86,3 @@ PUT {{api}}/invitations/accept/35/3
 # Reject an invitation
 PUT {{api}}/invitations/reject/35/3
 ###
-
-# Get all matches from user and status
-GET {{api}}/status/1/c
