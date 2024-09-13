@@ -536,10 +536,11 @@ export const getMatchInvitations = async (req, res) => {
 // Function to add an invitation to a match
 //
 export const addMatchInvitation = async (req, res) => {
+	console.log("Received Invitation Request:", req.body);
 	let connection;
 	try {
-		// Get matchId and userId from request body
-		const { matchId, userId } = req.body;
+		// Get matchId, userId, and senderId from request body
+		const { matchId, userId, senderId } = req.body;
 
 		// Get a connection from the pool
 		connection = await getConnection();
@@ -562,7 +563,7 @@ export const addMatchInvitation = async (req, res) => {
 			throw new Error("Match does not exist.");
 		}
 
-		// Check if the invitation already exists
+		// Check if the invitation already exists for this match and user
 		const [existingInvitation] = await connection.query(
 			"SELECT id FROM match_invitations WHERE match_id = ? AND user_id = ?",
 			[matchId, userId]
@@ -573,15 +574,16 @@ export const addMatchInvitation = async (req, res) => {
 
 		// Insert the invitation with status 'pending'
 		await connection.query(
-			"INSERT INTO match_invitations (match_id, user_id, status) VALUES (?, ?, 'pending')",
-			[matchId, userId]
+			"INSERT INTO match_invitations (match_id, user_id, status, sender_id) VALUES (?, ?, 'pending', ?)",
+			[matchId, userId, senderId]
 		);
 
-		// Send the response
+		// Send the success response
 		res.status(201).json({
 			message: "Invitation sent successfully",
 			matchId: matchId,
 			userId: userId,
+			senderId: senderId,
 		});
 	} catch (error) {
 		// Handle specific errors
@@ -594,11 +596,13 @@ export const addMatchInvitation = async (req, res) => {
 				message: "Invitation already exists for this user.",
 			});
 		} else {
+			// Handle any unexpected errors
 			console.error("Error adding invitation to match:", error);
 			res.status(500).json({ message: "Error adding invitation to match." });
 		}
 	} finally {
-		if (connection) connection.release(); // Release the connection
+		// Release the database connection back to the pool
+		if (connection) connection.release();
 	}
 };
 

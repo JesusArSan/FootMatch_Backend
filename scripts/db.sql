@@ -370,9 +370,11 @@ CREATE TABLE IF NOT EXISTS match_invitations (
     id INT PRIMARY KEY AUTO_INCREMENT,
     match_id INT NOT NULL, -- References the match for which the invitation was sent
     user_id INT NOT NULL, -- References the user who received the invitation
+    sender_id INT NOT NULL, -- References the user who sent the invitation
     status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending', -- Status of the invitation
     FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE -- References the sender
 );
 -------------------------------------------------
 -- MATCH_PARTICIPANTS TABLE --

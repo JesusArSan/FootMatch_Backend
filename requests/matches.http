@@ -58,31 +58,32 @@ Content-Type: application/json
 ###
 
 # Get all invitations from a match
-GET {{api}}/invitations/match/35
+GET {{api}}/invitations/35
 ###
 
 # Get all match invitations for a user by status
 GET {{api}}/invitations/2/pending
 ###
 
-# Add an invitation for user 2 to match 35
+# Add an invitation for user 2 to match 35 from user 1
 POST {{api}}/invitations
 Content-Type: application/json
 
 {
-    "matchId": 35,
-    "userId": 3
+   "matchId": 37,
+   "userId": 3,
+   "senderId": 1
 }
 ###
 
 # Delete an invitation 
-DELETE {{api}}/invitations/35/3
+DELETE {{api}}/invitations/37/3
 ###
 
 # Accept an invitation
-PUT {{api}}/invitations/accept/35/3
+PUT {{api}}/invitations/accept/37/3
 ###
 
 # Reject an invitation
-PUT {{api}}/invitations/reject/35/3
+PUT {{api}}/invitations/reject/37/3
 ###

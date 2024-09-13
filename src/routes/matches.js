@@ -258,7 +258,7 @@ router.delete("/matches/participants", deleteMatchParticipant); // Route to dele
  *      500:
  *        description: Server error
  */
-router.get("/matches/invitations/match/:match_id", getMatchInvitations); // Route to get invitations of a match
+router.get("/matches/invitations/:match_id", getMatchInvitations); // Route to get invitations of a match
 
 /**
  * @swagger
