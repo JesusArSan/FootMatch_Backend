@@ -556,16 +556,30 @@ export const addMatchInvitation = async (req, res) => {
 
 		// Check if the match exists
 		const [match] = await connection.query(
-			"SELECT id FROM matches WHERE id = ?",
+			"SELECT id, created_by_user_id FROM matches WHERE id = ?",
 			[matchId]
 		);
 		if (match.length === 0) {
 			throw new Error("Match does not exist.");
 		}
 
+		// Check if the user is the creator of the match
+		if (match[0].created_by_user_id === userId) {
+			throw new Error("User is the creator of the match.");
+		}
+
+		// Check if the user is already a participant in the match
+		const [participant] = await connection.query(
+			"SELECT id FROM match_participants WHERE match_id = ? AND user_id = ?",
+			[matchId, userId]
+		);
+		if (participant.length > 0) {
+			throw new Error("User is already a participant in the match.");
+		}
+
 		// Check if the invitation already exists for this match and user
 		const [existingInvitation] = await connection.query(
-			"SELECT id FROM match_invitations WHERE match_id = ? AND user_id = ?",
+			"SELECT id FROM match_invitations WHERE match_id = ? AND user_id = ? AND status = 'pending'",
 			[matchId, userId]
 		);
 		if (existingInvitation.length > 0) {
@@ -591,6 +605,14 @@ export const addMatchInvitation = async (req, res) => {
 			res.status(400).json({ message: "User does not exist." });
 		} else if (error.message === "Match does not exist.") {
 			res.status(400).json({ message: "Match does not exist." });
+		} else if (error.message === "User is the creator of the match.") {
+			res.status(400).json({ message: "User is the creator of the match." });
+		} else if (
+			error.message === "User is already a participant in the match."
+		) {
+			res.status(400).json({
+				message: "User is already a participant in the match.",
+			});
 		} else if (error.message === "Invitation already exists for this user.") {
 			res.status(400).json({
 				message: "Invitation already exists for this user.",
@@ -655,20 +677,20 @@ export const deleteMatchInvitation = async (req, res) => {
 };
 
 ///////////////////////////////////////////////////////////////////
-// Function to accept an invitation to a match
+// Function to accept an invitation to a match and add participant
 //
 export const acceptMatchInvitation = async (req, res) => {
 	let connection;
 	try {
-		// Get matchId and userId from request params
-		const { matchId, userId } = req.params;
+		// Get matchId and userId from request body
+		const { matchId, userId } = req.body;
 
 		// Get a connection from the pool
 		connection = await getConnection();
 
 		// Check if the invitation exists
 		const [invitation] = await connection.query(
-			"SELECT id FROM match_invitations WHERE match_id = ? AND user_id = ?",
+			"SELECT id FROM match_invitations WHERE match_id = ? AND user_id = ? AND status = 'pending'",
 			[matchId, userId]
 		);
 		if (invitation.length === 0) {
@@ -677,13 +699,26 @@ export const acceptMatchInvitation = async (req, res) => {
 
 		// Update the invitation status to 'accepted'
 		await connection.query(
-			"UPDATE match_invitations SET status = 'accepted' WHERE match_id = ? AND user_id = ?",
+			"UPDATE match_invitations SET status = 'accepted' WHERE match_id = ? AND user_id = ? AND status = 'pending'",
 			[matchId, userId]
 		);
 
+		// Check if the user is already a participant in the match
+		const [existingParticipant] = await connection.query(
+			"SELECT id FROM match_participants WHERE match_id = ? AND user_id = ?",
+			[matchId, userId]
+		);
+		if (existingParticipant.length === 0) {
+			// Insert the user into the match_participants table with team_id as null and is_leader as false
+			await connection.query(
+				"INSERT INTO match_participants (match_id, user_id, team_id, is_leader) VALUES (?, ?, NULL, false)",
+				[matchId, userId]
+			);
+		}
+
 		// Send the response
 		res.status(200).json({
-			message: "Invitation accepted successfully",
+			message: "Invitation accepted and participant added successfully",
 			matchId: matchId,
 			userId: userId,
 		});
@@ -706,15 +741,15 @@ export const acceptMatchInvitation = async (req, res) => {
 export const rejectMatchInvitation = async (req, res) => {
 	let connection;
 	try {
-		// Get matchId and userId from request params
-		const { matchId, userId } = req.params;
+		// Get matchId and userId from request body
+		const { matchId, userId } = req.body;
 
 		// Get a connection from the pool
 		connection = await getConnection();
 
 		// Check if the invitation exists
 		const [invitation] = await connection.query(
-			"SELECT id FROM match_invitations WHERE match_id = ? AND user_id = ?",
+			"SELECT id FROM match_invitations WHERE match_id = ? AND user_id = ? AND status = 'pending'",
 			[matchId, userId]
 		);
 		if (invitation.length === 0) {

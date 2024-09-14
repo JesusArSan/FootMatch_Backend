@@ -371,6 +371,7 @@ CREATE TABLE IF NOT EXISTS match_invitations (
     match_id INT NOT NULL, -- References the match for which the invitation was sent
     user_id INT NOT NULL, -- References the user who received the invitation
     sender_id INT NOT NULL, -- References the user who sent the invitation
+    invitation_date DATETIME DEFAULT CURRENT_TIMESTAMP, -- Date when the invitation was sent
     status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending', -- Status of the invitation
     FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -407,20 +408,4 @@ VALUES
 (3, 1, 3, 2, 1, '2024-09-05 15:30:00', 'completed', 1); -- Match played between Team A and Los Guerreros, created by user with ID 1
 -- Insert data into match_participants table
 INSERT INTO match_participants (match_id, user_id, team_id, is_leader)
-VALUES
--- Participants in Match 1 (Team A vs Team B)
-(1, 1, 1, TRUE), -- User 1 is the leader of Team A in Match 1
-(1, 3, 1, FALSE), -- User 3 is a player in Team A in Match 1
-(1, 2, 2, TRUE), -- User 2 is the leader of Team B in Match 1
-
-(2, 1, 2, false),
-
--- Participants in Match 2 (Los Guerreros vs The Eagles)
-(2, 4, 3, TRUE), -- User 4 is the leader of Los Guerreros in Match 2
-(2, 5, 3, FALSE), -- User 5 is a player in Los Guerreros in Match 2
-(2, 6, 4, TRUE), -- User 6 is the leader of The Eagles in Match 2
-(2, 7, 4, FALSE), -- User 7 is a player in The Eagles in Match 2
-
--- Participants in Match 3 (Team A vs Los Guerreros)
-(3, 1, 1, TRUE), -- User 1 is the leader of Team A in Match 3
-(3, 4, 3, TRUE); -- User 4 is the leader of Los Guerreros in Match 3
+VALUES (35, 1, null, false), (35, 2, null, FALSE);

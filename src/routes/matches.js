@@ -323,67 +323,67 @@ router.delete("/matches/invitations/:matchId/:userId", deleteMatchInvitation);
 
 /**
  * @swagger
- * /matches/invitations/accept/{matchId}/{userId}:
+ * /matches/invitations/accept:
  *  put:
- *    summary: Accept an invitation to a match
+ *    summary: Accept an invitation to a match and add the user as a participant
  *    tags: [matches]
- *    parameters:
- *      - in: path
- *        name: matchId
- *        schema:
- *          type: integer
- *        required: true
- *        description: The ID of the match
- *      - in: path
- *        name: userId
- *        schema:
- *          type: integer
- *        required: true
- *        description: The ID of the user
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              matchId:
+ *                type: integer
+ *                description: The ID of the match
+ *              userId:
+ *                type: integer
+ *                description: The ID of the user
+ *            required:
+ *              - matchId
+ *              - userId
  *    responses:
  *      200:
- *        description: Invitation accepted successfully
+ *        description: Invitation accepted and participant added successfully
  *      400:
- *        description: Invitation does not exist
+ *        description: Invitation does not exist or required fields are missing
  *      500:
  *        description: Server error
  */
-router.put(
-	"/matches/invitations/accept/:matchId/:userId",
-	acceptMatchInvitation
-);
+router.put("/matches/invitations/accept", acceptMatchInvitation);
 
 /**
  * @swagger
- * /matches/invitations/reject/{matchId}/{userId}:
+ * /matches/invitations/reject:
  *  put:
  *    summary: Reject an invitation to a match
  *    tags: [matches]
- *    parameters:
- *      - in: path
- *        name: matchId
- *        schema:
- *          type: integer
- *        required: true
- *        description: The ID of the match
- *      - in: path
- *        name: userId
- *        schema:
- *          type: integer
- *        required: true
- *        description: The ID of the user
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              matchId:
+ *                type: integer
+ *                description: The ID of the match
+ *              userId:
+ *                type: integer
+ *                description: The ID of the user
+ *            required:
+ *              - matchId
+ *              - userId
  *    responses:
  *      200:
  *        description: Invitation rejected successfully
  *      400:
- *        description: Invitation does not exist
+ *        description: Invitation does not exist or required fields are missing
  *      500:
  *        description: Server error
  */
-router.put(
-	"/matches/invitations/reject/:matchId/:userId",
-	rejectMatchInvitation
-);
+router.put("/matches/invitations/reject", rejectMatchInvitation);
 
 /**
  * @swagger
