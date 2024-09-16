@@ -15,6 +15,7 @@ import {
 	rejectMatchInvitation,
 	getMatchesByStatus,
 	getUserMatchInvitations,
+	changeMatchStatus,
 } from "../controllers/matches.js";
 
 const router = Router();
@@ -411,5 +412,70 @@ router.put("/matches/invitations/reject", rejectMatchInvitation);
  *         description: Server error
  */
 router.get("/matches/invitations/:user_id/:status", getUserMatchInvitations); // Route to get user match invitations by status
+
+/**
+ * @swagger
+ * /matches/newstatus/:
+ *   put:
+ *     summary: Change the status of a match
+ *     tags: [matches]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - matchId
+ *               - status
+ *             properties:
+ *               matchId:
+ *                 type: integer
+ *                 description: ID of the match to change the status of
+ *                 example: 123
+ *               status:
+ *                 type: string
+ *                 description: New status of the match (scheduled, completed, canceled)
+ *                 enum: [scheduled, completed, canceled]
+ *                 example: completed
+ *     responses:
+ *       200:
+ *         description: Match status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Match status updated successfully
+ *                 matchId:
+ *                   type: integer
+ *                   example: 123
+ *                 status:
+ *                   type: string
+ *                   example: completed
+ *       400:
+ *         description: Bad request, match not found or invalid data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Match does not exist.
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error updating match status.
+ */
+router.put("/matches/newstatus/", changeMatchStatus); // Route to change status of a match
 
 export default router;

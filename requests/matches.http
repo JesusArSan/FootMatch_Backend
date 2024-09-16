@@ -70,8 +70,8 @@ POST {{api}}/invitations
 Content-Type: application/json
 
 {
-   "matchId": 35,
-   "userId": 3,
+   "matchId": 59,
+   "userId": 2,
    "senderId": 1
 }
 ###
@@ -85,7 +85,7 @@ PUT {{api}}/invitations/accept
 Content-Type: application/json
 
 {
-   "matchId": 35,
+   "matchId": 41,
    "userId": 3
 }
 ###
@@ -97,5 +97,25 @@ Content-Type: application/json
 {
    "matchId": 35,
    "userId": 3
+}
+###
+
+# Update match status
+PUT {{api}}/newstatus/
+Content-Type: application/json
+
+{
+   "matchId": 55,
+   "status": "completed"
+}
+###
+
+# Update match status
+PUT {{api}}/newstatus/
+Content-Type: application/json
+
+{
+   "matchId": 55,
+   "status": "scheduled"
 }
 ###

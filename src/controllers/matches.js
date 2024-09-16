@@ -780,3 +780,61 @@ export const rejectMatchInvitation = async (req, res) => {
 		if (connection) connection.release(); // Release the connection
 	}
 };
+
+///////////////////////////////////////////////////////////////////
+// Function to change status
+//
+export const changeMatchStatus = async (req, res) => {
+	let connection;
+	try {
+		// Get matchId and status from request body
+		const { matchId, status } = req.body;
+
+		// Allowed status values
+		const allowedStatuses = ["scheduled", "completed", "canceled"];
+
+		// Validate the status
+		if (!allowedStatuses.includes(status)) {
+			return res.status(400).json({
+				message:
+					"Invalid status. Allowed values are 'scheduled', 'completed', or 'canceled'.",
+			});
+		}
+
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Check if the match exists
+		const [match] = await connection.query(
+			"SELECT id FROM matches WHERE id = ?",
+			[matchId]
+		);
+
+		if (match.length === 0) {
+			throw new Error("Match does not exist.");
+		}
+
+		// Update the match status
+		await connection.query("UPDATE matches SET status = ? WHERE id = ?", [
+			status,
+			matchId,
+		]);
+
+		// Send the response
+		res.status(200).json({
+			message: "Match status updated successfully",
+			matchId: matchId,
+			status: status,
+		});
+	} catch (error) {
+		// Handle specific errors
+		if (error.message === "Match does not exist.") {
+			res.status(404).json({ message: "Match does not exist." });
+		} else {
+			console.error("Error updating match status:", error);
+			res.status(500).json({ message: "Error updating match status." });
+		}
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
