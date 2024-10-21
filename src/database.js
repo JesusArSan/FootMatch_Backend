@@ -1,10 +1,10 @@
 import mysql from "mysql2/promise";
 import { config } from "./config.js"; // Import the config object
 
-// Crear un pool de conexiones
+// Create a pool of connections
 export const pool = mysql.createPool(config);
 
-// Función para obtener una conexión del pool
+// Get a connection from the pool
 export const getConnection = async () => {
 	return await pool.getConnection();
 };

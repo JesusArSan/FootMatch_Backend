@@ -19,6 +19,7 @@ import {
 	removeFriendRequest,
 	removeFriend,
 	validateToken,
+	updateProfilePhoto,
 } from "../controllers/users.js";
 
 const router = Router();
@@ -192,5 +193,38 @@ router.post("/users/friend_requests/status/", getFriendRequestStatus); // Remove
  *   tags: [Friend Requests]
  */
 router.delete("/users/friend_requests/:userId/:friendId", removeFriendRequest); // Remove friend request
+
+/**
+ * @swagger
+ * /users/{userId}/update_photo:
+ *   put:
+ *     summary: Update User Profile Photo
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: ID of the user to update
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               photoUrl:
+ *                 type: string
+ *                 description: The URL of the new profile photo
+ *     responses:
+ *       200:
+ *         description: Profile photo updated successfully
+ *       400:
+ *         description: Invalid input
+ *       500:
+ *         description: Internal server error
+ */
+router.put("/users/:userId/update_photo", updateProfilePhoto);
 
 export default router;

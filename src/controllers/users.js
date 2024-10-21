@@ -658,3 +658,38 @@ export const validateToken = (req, res) => {
 		res.status(200).json({ message: "Token is valid", userId: decoded.id });
 	});
 };
+
+// Function to update the user's profile photo URL
+export const updateProfilePhoto = async (req, res) => {
+	const { userId } = req.params;
+	const { photoUrl } = req.body;
+
+	if (!photoUrl) {
+		return res.status(400).json({ message: "Photo URL is required." });
+	}
+
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Update the user's profile photo URL in the database
+		const [result] = await connection.query(
+			"UPDATE users SET photo = ? WHERE id = ?",
+			[photoUrl, userId]
+		);
+
+		// Check if the user was updated
+		if (result.affectedRows === 0) {
+			return res.status(404).json({ message: "User not found." });
+		}
+
+		// Send a success response
+		res.status(200).json({ message: "Profile photo updated successfully." });
+	} catch (error) {
+		console.error("Error updating profile photo:", error);
+		res.status(500).json({ message: "Error updating profile photo." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};

@@ -128,3 +128,12 @@ Content-Type: application/json
 }
 ###
 
+
+# Update a user photo
+PUT {{api}}/1/update_photo
+Content-Type: application/json
+
+{
+    "photoUrl": "https://this-person-does-not-exist.com/img/avatar-gen4fa732bb26c3e8561e4c8fd0c62a0e4a.jpg"
+}
+###
