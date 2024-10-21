@@ -16,10 +16,16 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) NOT NULL UNIQUE,
     username VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+    role_id INT NOT NULL DEFAULT 2,  -- Default value set to 3 (regular user)
     photo VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     status VARCHAR(20) DEFAULT 'active'
+    FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+CREATE TABLE IF NOT EXISTS roles (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    role_name VARCHAR(50) NOT NULL UNIQUE
 );
 -- Create Friends Table
 CREATE TABLE IF NOT EXISTS friends (
@@ -46,11 +52,12 @@ CREATE TABLE IF NOT EXISTS friend_requests (
 -- USERS TABLE DATA --
 -------------------------------------------------
 -- Insertar usuarios en la tabla users con el campo photo
-INSERT INTO users (name, email, username, password, photo)
-VALUES ('Admin', 'root@gmail.com', 'root', 'root', 'https://this-person-does-not-exist.com/img/avatar-gen4fa732bb26c3e8561e4c8fd0c62a0e4a.jpg'),
-       ('Antonio', 'tone@gmail.com', 'tone', 'tone', 'https://this-person-does-not-exist.com/img/avatar-geneecc00d9abfd151db98367ca0bd570ea.jpg'),
-       ('Antonio Tapia', 'Antapia@gmail.com', 'brons', 'brons', 'https://this-person-does-not-exist.com/img/avatar-genfb239b52507ebf268d0387859af88aee.jpg');
-
+INSERT INTO users (name, email, username, password, role_id, photo)
+VALUES ('Admin', 'root@gmail.com', 'root', 'root', '1', 'https://this-person-does-not-exist.com/img/avatar-gen4fa732bb26c3e8561e4c8fd0c62a0e4a.jpg'),
+       ('Antonio', 'tone@gmail.com', 'tone', 'tone', '3', 'https://this-person-does-not-exist.com/img/avatar-geneecc00d9abfd151db98367ca0bd570ea.jpg'),
+       ('Antonio Tapia', 'Antapia@gmail.com', 'brons', 'brons', '2', 'https://this-person-does-not-exist.com/img/avatar-genfb239b52507ebf268d0387859af88aee.jpg');
+-- Insertar roles en la tabla roles
+INSERT INTO roles (role_name) VALUES ('Admin'), ('Moderator'), ('User');
 -- Insert friends data bidirectional
 INSERT INTO friends (user_id, friend_id) VALUES (1, 2);
 INSERT INTO friends (user_id, friend_id) VALUES (2, 1);

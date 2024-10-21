@@ -300,7 +300,7 @@ export const getFriends = async (req, res) => {
 
 		// Query to the database to get friends details
 		const [friends] = await connection.query(
-			`SELECT u.id, u.username, u.name, u.email, u.photo
+			`SELECT u.id, u.username, u.name, u.email, u.role_id, u.photo
        FROM friends f
        JOIN users u ON f.friend_id = u.id
        WHERE f.user_id = ?`,
@@ -362,7 +362,7 @@ export const getFriendRequests = async (req, res) => {
 
 		// Query to the database to get friend requests
 		const [friendRequests] = await connection.query(
-			`SELECT fr.id, fr.sender_id, u.username, u.photo AS sender_photo, fr.status, fr.created_at 
+			`SELECT fr.id, fr.sender_id, u.username, u.role_id, u.photo AS sender_photo, fr.status, fr.created_at 
 							FROM friend_requests fr 
 							JOIN users u 
 							ON fr.sender_id = u.id 
@@ -689,6 +689,41 @@ export const updateProfilePhoto = async (req, res) => {
 	} catch (error) {
 		console.error("Error updating profile photo:", error);
 		res.status(500).json({ message: "Error updating profile photo." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+// Function to update a user's role
+export const updateUserRole = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		const { user_id } = req.params; // Get user_id from URL parameters
+		const { role_id } = req.body; // Get role_id from request body
+
+		// Check if user exists
+		const [existingUser] = await connection.query(
+			"SELECT * FROM users WHERE id = ?",
+			[user_id]
+		);
+		if (existingUser.length === 0) {
+			return res.status(404).json({ message: "User not found." });
+		}
+
+		// Update the user's role
+		await connection.query("UPDATE users SET role_id = ? WHERE id = ?", [
+			role_id,
+			user_id,
+		]);
+
+		// Successful response
+		res.json({ message: "User role updated successfully." });
+	} catch (error) {
+		console.error("Error updating user role:", error);
+		res.status(500).json({ message: "Error updating user role." });
 	} finally {
 		if (connection) connection.release(); // Release the connection
 	}

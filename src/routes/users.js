@@ -20,6 +20,7 @@ import {
 	removeFriend,
 	validateToken,
 	updateProfilePhoto,
+	updateUserRole,
 } from "../controllers/users.js";
 
 const router = Router();
@@ -226,5 +227,27 @@ router.delete("/users/friend_requests/:userId/:friendId", removeFriendRequest); 
  *         description: Internal server error
  */
 router.put("/users/:userId/update_photo", updateProfilePhoto);
+
+/**
+ * @swagger
+ * /users/{user_id}/update_role:
+ *  put:
+ *    summary: Update a user's role
+ *    tags: [Users]
+ *    parameters:
+ *      - name: user_id
+ *        in: path
+ *        required: true
+ *        description: ID of the user to update
+ *        schema:
+ *          type: integer
+ *      - name: role_id
+ *        in: body
+ *        required: true
+ *        description: New role ID for the user
+ *        schema:
+ *          type: integer
+ */
+router.put("/users/:user_id/update_role", updateUserRole); // Update user role
 
 export default router;
