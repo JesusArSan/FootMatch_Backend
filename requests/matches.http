@@ -42,8 +42,8 @@ POST {{api}}/participants
 Content-Type: application/json
 
 {
-   "matchId": 39,
-   "userId": 1
+   "matchId": 4,
+   "userId": 2
 }
 ###
 
@@ -52,8 +52,8 @@ DELETE {{api}}/participants
 Content-Type: application/json
 
 {
-   "matchId": 39,
-   "userId": 1
+   "matchId": 4,
+   "userId": 2
 }
 ###
 
