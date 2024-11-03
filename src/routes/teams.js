@@ -8,6 +8,7 @@ import {
 	getCreatedTeamsByUser,
 	getTeamsByUser,
 	getTeamUsers,
+	getAllCustomTeams,
 } from "../controllers/teams.js";
 
 const router = Router();
@@ -91,5 +92,41 @@ router.delete("/teams/:team_id/remove_user/:user_id", removeUserFromTeam); // Re
  *    tags: [Teams]
  */
 router.get("/teams/:team_id/users", getTeamUsers); // Get users in a team
+
+/**
+ * @swagger
+ * /teams/custom:
+ *   get:
+ *     summary: Get all custom teams
+ *     tags: [Teams]
+ *     responses:
+ *       200:
+ *         description: List of all custom teams
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: Team ID
+ *                   name:
+ *                     type: string
+ *                     description: Team name
+ *                   short_name:
+ *                     type: string
+ *                     description: Team short name
+ *                   logo_url:
+ *                     type: string
+ *                     description: URL for team logo
+ *                   is_custom_team:
+ *                     type: boolean
+ *                     description: Whether the team is custom or default
+ *       500:
+ *         description: Server error
+ */
+router.get("/teams/custom/:matchId", getAllCustomTeams);
 
 export default router;

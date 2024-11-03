@@ -18,6 +18,10 @@ import {
 	changeMatchStatus,
 	changeMatchAccessType,
 	getMatchesByAccessType,
+	setNewLocalTeamToMatch,
+	setNewVisitorTeamToMatch,
+	removeAllPlayersFromMatch,
+	addPlayersToMatchFromTeam,
 } from "../controllers/matches.js";
 
 const router = Router();
@@ -511,5 +515,128 @@ router.put("/matches/change_access_type", changeMatchAccessType); // Change matc
  *        description: Server error
  */
 router.get("/matches/access_type/:accessType", getMatchesByAccessType);
+
+/**
+ * @swagger
+ * /matches/{matchId}/setLocalTeam:
+ *  put:
+ *    summary: Set a new local team for a match
+ *    tags: [Matches]
+ *    parameters:
+ *      - in: path
+ *        name: matchId
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: The ID of the match
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              teamId:
+ *                type: integer
+ *                description: The ID of the new local team
+ *    responses:
+ *      200:
+ *        description: Local team set successfully
+ *      400:
+ *        description: Invalid teamId or matchId
+ *      404:
+ *        description: Match or team not found
+ *      500:
+ *        description: Server error
+ */
+router.put("/matches/setLocalTeam", setNewLocalTeamToMatch);
+
+/**
+ * @swagger
+ * /matches/{matchId}/setVisitorTeam:
+ *  put:
+ *    summary: Set a new visitor team for a match
+ *    tags: [Matches]
+ *    parameters:
+ *      - in: path
+ *        name: matchId
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: The ID of the match
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              teamId:
+ *                type: integer
+ *                description: The ID of the new visitor team
+ *    responses:
+ *      200:
+ *        description: Visitor team set successfully
+ *      400:
+ *        description: Invalid teamId or matchId
+ *      404:
+ *        description: Match or team not found
+ *      500:
+ *        description: Server error
+ */
+router.put("/matches/setVisitorTeam", setNewVisitorTeamToMatch);
+
+/**
+ * @swagger
+ * /matches/{matchId}/players:
+ *   delete:
+ *     summary: Remove all players from a match
+ *     tags: [Matches]
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the match
+ *     responses:
+ *       200:
+ *         description: All players removed from the match successfully
+ *       500:
+ *         description: Server error
+ */
+router.delete("/matches/:matchId/players", removeAllPlayersFromMatch);
+
+/**
+ * @swagger
+ * /matches/{matchId}/teams/{teamId}/players:
+ *   post:
+ *     summary: Add players from a custom team to a match
+ *     tags: [Matches]
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the match
+ *       - in: path
+ *         name: teamId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the custom team
+ *     responses:
+ *       200:
+ *         description: Players from the custom team added to the match successfully
+ *       404:
+ *         description: No players found in the specified custom team
+ *       500:
+ *         description: Server error
+ */
+router.post(
+	"/matches/:matchId/teams/:teamId/players",
+	addPlayersToMatchFromTeam
+);
 
 export default router;

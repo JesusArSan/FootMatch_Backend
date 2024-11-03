@@ -1,3 +1,4 @@
+import { match } from "assert";
 import { getConnection } from "../database.js";
 import crypto from "crypto"; // Import to generate unique names
 
@@ -156,8 +157,8 @@ export const getMatchById = async (req, res) => {
 		// Query to get the match details
 		const [match] = await connection.query(
 			`SELECT m.*,
-					team_a.name AS team_a_name, team_a.logo_url AS team_a_logo, team_a.created_at AS team_a_created_at,
-					team_b.name AS team_b_name, team_b.logo_url AS team_b_logo, team_b.created_at AS team_b_created_at
+					team_a.id AS team_a_id, team_a.name AS team_a_name, team_a.logo_url AS team_a_logo, team_a.created_at AS team_a_created_at, team_a.is_custom_team AS team_a_is_custom,
+					team_b.id AS team_b_id, team_b.name AS team_b_name, team_b.logo_url AS team_b_logo, team_b.created_at AS team_b_created_at, team_b.is_custom_team AS team_b_is_custom
 				FROM matches m
 				LEFT JOIN teams team_a ON m.team_a_id = team_a.id
 				LEFT JOIN teams team_b ON m.team_b_id = team_b.id
@@ -947,6 +948,303 @@ export const getMatchesByAccessType = async (req, res) => {
 		console.error("Error getting matches by access type:", error); // Detailed error
 		res.status(500).json({
 			message: "Error getting matches by access type.",
+		});
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Set a custom local team for a match
+//
+export const setNewLocalTeamToMatch = async (req, res) => {
+	let connection;
+	try {
+		const { matchId, teamId } = req.body;
+		connection = await getConnection();
+
+		// Check if the new team exists and is custom
+		const [newTeam] = await connection.query(
+			"SELECT id FROM teams WHERE id = ? AND is_custom_team = 1",
+			[teamId]
+		);
+		if (newTeam.length === 0) {
+			return res.status(404).json({ message: "Custom team not found." });
+		}
+
+		// Retrieve the currently assigned local team and visitor team
+		const [currentTeams] = await connection.query(
+			"SELECT team_a_id, team_b_id FROM matches WHERE id = ?",
+			[matchId]
+		);
+		if (currentTeams.length === 0) {
+			return res.status(404).json({ message: "Match not found." });
+		}
+
+		const currentTeamId = currentTeams[0].team_a_id;
+		const visitorTeamId = currentTeams[0].team_b_id;
+
+		// If the current local team is the same as the new team, skip update
+		if (currentTeamId === teamId) {
+			return res
+				.status(200)
+				.json({ message: "Local team is already set to this team." });
+		}
+
+		// Check if visitor team is custom and retrieve its players
+		if (visitorTeamId) {
+			const [visitorTeam] = await connection.query(
+				"SELECT is_custom_team FROM teams WHERE id = ?",
+				[visitorTeamId]
+			);
+
+			if (visitorTeam.length > 0 && visitorTeam[0].is_custom_team) {
+				// Retrieve players from the new local team and visitor team
+				const [localTeamPlayers] = await connection.query(
+					"SELECT user_id FROM BelongTeam WHERE team_id = ?",
+					[teamId]
+				);
+				const [visitorTeamPlayers] = await connection.query(
+					"SELECT user_id FROM BelongTeam WHERE team_id = ?",
+					[visitorTeamId]
+				);
+
+				// Check if there are common players between the two teams
+				const visitorPlayerIds = new Set(
+					visitorTeamPlayers.map((player) => player.user_id)
+				);
+				const hasCommonPlayers = localTeamPlayers.some((player) =>
+					visitorPlayerIds.has(player.user_id)
+				);
+
+				if (hasCommonPlayers) {
+					return res.status(400).json({
+						message:
+							"The new local team has players that are already part of the visitor team.",
+					});
+				}
+			}
+		}
+
+		// Check if the current team needs to be deleted
+		if (currentTeamId) {
+			const [teamToDelete] = await connection.query(
+				"SELECT is_custom_team FROM teams WHERE id = ?",
+				[currentTeamId]
+			);
+
+			// Delete only if the current team is not custom
+			if (teamToDelete.length > 0 && !teamToDelete[0].is_custom_team) {
+				await connection.query("DELETE FROM teams WHERE id = ?", [
+					currentTeamId,
+				]);
+			}
+		}
+
+		// Update local team for the match
+		await connection.query("UPDATE matches SET team_a_id = ? WHERE id = ?", [
+			teamId,
+			matchId,
+		]);
+
+		res.status(200).json({
+			message: "Local team set successfully.",
+			matchId: matchId,
+			teamId: teamId,
+		});
+	} catch (error) {
+		console.error("Error setting local team to match:", error);
+		res.status(500).json({ message: "Error setting local team to match." });
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Set a custom visitor team for a match
+//
+export const setNewVisitorTeamToMatch = async (req, res) => {
+	let connection;
+	try {
+		const { matchId, teamId } = req.body;
+		connection = await getConnection();
+
+		// Check if the new team exists and is custom
+		const [newTeam] = await connection.query(
+			"SELECT id FROM teams WHERE id = ? AND is_custom_team = 1",
+			[teamId]
+		);
+		if (newTeam.length === 0) {
+			return res.status(404).json({ message: "Custom team not found." });
+		}
+
+		// Retrieve the currently assigned local and visitor teams
+		const [currentTeams] = await connection.query(
+			"SELECT team_a_id, team_b_id FROM matches WHERE id = ?",
+			[matchId]
+		);
+		if (currentTeams.length === 0) {
+			return res.status(404).json({ message: "Match not found." });
+		}
+
+		const localTeamId = currentTeams[0].team_a_id;
+		const currentVisitorTeamId = currentTeams[0].team_b_id;
+
+		// If the visitor team is already set to the requested team, skip update
+		if (currentVisitorTeamId === teamId) {
+			return res
+				.status(200)
+				.json({ message: "Visitor team is already set to this team." });
+		}
+
+		// Check if local team is custom and retrieve its players
+		if (localTeamId) {
+			const [localTeam] = await connection.query(
+				"SELECT is_custom_team FROM teams WHERE id = ?",
+				[localTeamId]
+			);
+
+			if (localTeam.length > 0 && localTeam[0].is_custom_team) {
+				// Retrieve players from the new visitor team and the local team
+				const [visitorTeamPlayers] = await connection.query(
+					"SELECT user_id FROM BelongTeam WHERE team_id = ?",
+					[teamId]
+				);
+				const [localTeamPlayers] = await connection.query(
+					"SELECT user_id FROM BelongTeam WHERE team_id = ?",
+					[localTeamId]
+				);
+
+				// Check if there are common players between the two teams
+				const localPlayerIds = new Set(
+					localTeamPlayers.map((player) => player.user_id)
+				);
+				const hasCommonPlayers = visitorTeamPlayers.some((player) =>
+					localPlayerIds.has(player.user_id)
+				);
+
+				if (hasCommonPlayers) {
+					return res.status(400).json({
+						message:
+							"The new visitor team has players that are already part of the local team.",
+					});
+				}
+			}
+		}
+
+		// Check if the current visitor team needs to be deleted
+		if (currentVisitorTeamId) {
+			const [teamToDelete] = await connection.query(
+				"SELECT is_custom_team FROM teams WHERE id = ?",
+				[currentVisitorTeamId]
+			);
+
+			// Delete only if the current team is not custom
+			if (teamToDelete.length > 0 && !teamToDelete[0].is_custom_team) {
+				await connection.query("DELETE FROM teams WHERE id = ?", [
+					currentVisitorTeamId,
+				]);
+			}
+		}
+
+		// Update visitor team for the match
+		await connection.query("UPDATE matches SET team_b_id = ? WHERE id = ?", [
+			teamId,
+			matchId,
+		]);
+
+		res.status(200).json({
+			message: "Visitor team set successfully.",
+			matchId: matchId,
+			teamId: teamId,
+		});
+	} catch (error) {
+		console.error("Error setting visitor team to match:", error);
+		res.status(500).json({ message: "Error setting visitor team to match." });
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Function to remove all players from a match
+//
+export const removeAllPlayersFromMatch = async (req, res) => {
+	let connection;
+	try {
+		connection = await getConnection();
+		const { matchId } = req.params;
+
+		// Delete all players associated with the match
+		await connection.query(
+			"DELETE FROM match_participants WHERE match_id = ?",
+			[matchId]
+		);
+
+		res.status(200).json({
+			message: "All players removed from the match successfully.",
+		});
+	} catch (error) {
+		console.error("Error removing players from match:", error);
+		res.status(500).json({ message: "Error removing players from match." });
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Function to add players from a custom team to a match
+//
+export const addPlayersToMatchFromTeam = async (req, res) => {
+	let connection;
+	try {
+		connection = await getConnection();
+		const { matchId, teamId } = req.params;
+
+		// Retrieve players from the specified custom team
+		const [players] = await connection.query(
+			"SELECT user_id FROM BelongTeam WHERE team_id = ?",
+			[teamId]
+		);
+
+		if (players.length === 0) {
+			return res.status(404).json({
+				message: "No players found in the specified custom team.",
+			});
+		}
+
+		// Filter out players who are already in the match
+		const playersToAdd = [];
+		for (const player of players) {
+			const [existingParticipant] = await connection.query(
+				"SELECT 1 FROM match_participants WHERE match_id = ? AND user_id = ?",
+				[matchId, player.user_id]
+			);
+			if (existingParticipant.length === 0) {
+				playersToAdd.push([matchId, player.user_id]);
+			}
+		}
+
+		// Add only new players to the match
+		if (playersToAdd.length > 0) {
+			await connection.query(
+				"INSERT INTO match_participants (match_id, user_id) VALUES ?",
+				[playersToAdd]
+			);
+			res.status(200).json({
+				message:
+					"New players from the custom team added to the match successfully.",
+			});
+		} else {
+			res.status(200).json({
+				message:
+					"All players from the custom team are already in the match.",
+			});
+		}
+	} catch (error) {
+		console.error("Error adding players from custom team to match:", error);
+		res.status(500).json({
+			message: "Error adding players from custom team to match.",
 		});
 	} finally {
 		if (connection) connection.release();

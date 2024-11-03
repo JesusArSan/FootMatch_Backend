@@ -50,3 +50,7 @@ GET {{api}}/user/2
 # Remove a user from a team
 DELETE {{api}}/132/remove_user/2
 ###
+
+# Get all custom teams
+GET {{api}}/custom/6
+###

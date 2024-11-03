@@ -203,7 +203,7 @@ export const getCreatedTeamsByUser = async (req, res) => {
 
 		// Query to get teams created by the user
 		const [teams] = await connection.query(
-			"SELECT * FROM teams WHERE created_by_user_id = ?",
+			"SELECT * FROM teams WHERE created_by_user_id = ? AND is_custom_team = 1",
 			[user_id]
 		);
 
@@ -229,7 +229,7 @@ export const getTeamsByUser = async (req, res) => {
 		const [teams] = await connection.query(
 			`SELECT t.* FROM teams t
 			 JOIN BelongTeam bt ON t.id = bt.team_id
-			 WHERE bt.user_id = ?`,
+			 WHERE bt.user_id = ? AND t.is_custom_team = 1`,
 			[user_id]
 		);
 
@@ -264,6 +264,44 @@ export const getTeamUsers = async (req, res) => {
 	} catch (error) {
 		console.error("Error getting team users:", error);
 		res.status(500).json({ message: "Error getting team users." });
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Function to get all custom teams excluding those already assigned to the match
+//
+export const getAllCustomTeams = async (req, res) => {
+	let connection;
+	try {
+		connection = await getConnection();
+		const { matchId } = req.params; // Get matchId from request parameters
+
+		console.log("matchId:", matchId);
+
+		// Fetch teams assigned to the specified match
+		const [assignedTeams] = await connection.query(
+			"SELECT team_a_id, team_b_id FROM matches WHERE id = ?",
+			[matchId]
+		);
+
+		if (assignedTeams.length === 0) {
+			return res.status(404).json({ message: "Match not found." });
+		}
+
+		const { team_a_id, team_b_id } = assignedTeams[0];
+
+		// Fetch custom teams that are not assigned as team_a or team_b in the match
+		const [teams] = await connection.query(
+			"SELECT * FROM teams WHERE is_custom_team = true AND id NOT IN (?, ?) ORDER BY name ASC",
+			[team_a_id, team_b_id]
+		);
+
+		res.status(200).json(teams);
+	} catch (error) {
+		console.error("Error fetching custom teams:", error);
+		res.status(500).json({ message: "Error fetching custom teams." });
 	} finally {
 		if (connection) connection.release();
 	}

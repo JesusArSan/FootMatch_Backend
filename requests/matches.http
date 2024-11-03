@@ -138,4 +138,30 @@ Content-Type: application/json
 }
 ###
 
+# Set a new visitor team for a match
+PUT {{api}}/setLocalTeam
+Content-Type: application/json
 
+{
+   "matchId": 6,
+   "teamId": 217
+}
+###
+
+# Set a new visitor team for a match
+PUT {{api}}/setVisitorTeam
+Content-Type: application/json
+
+{
+   "matchId": 6,
+   "teamId": 217
+}
+###
+
+# Remove all players from a match
+DELETE {{api}}/6/players
+###
+
+# Add players from a custom team to a match
+POST {{api}}/6/teams/217/players
+###
