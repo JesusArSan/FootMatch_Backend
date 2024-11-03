@@ -34,7 +34,7 @@ GET {{api}}/35
 ###
 
 # Get all matches from user and status
-GET {{api}}/status/1/completed
+GET {{api}}/status/2/scheduled
 ###
 
 # Add a participant to a match
@@ -119,3 +119,23 @@ Content-Type: application/json
    "status": "scheduled"
 }
 ###
+
+# Get matches by access type
+GET {{api}}/access_type/public
+###
+
+# Get private matches
+GET {{api}}/access_type/private
+###
+
+# Change access type of a match
+PUT {{api}}/change_access_type
+Content-Type: application/json
+
+{
+    "matchId": 72,
+    "accessType": "public"
+}
+###
+
+

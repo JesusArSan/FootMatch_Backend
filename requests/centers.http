@@ -9,8 +9,8 @@ GET {{api}}
 GET {{api}}/1
 ###
 
-# Get Pitch Occupancy
-GET {{api}}/pitch_occupancies/3
+# Get the host (occupancy) of a pitch
+GET {{api}}/pitches/1/host
 ###
 
 # Add center to fav user list

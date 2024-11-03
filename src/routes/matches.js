@@ -16,6 +16,8 @@ import {
 	getMatchesByStatus,
 	getUserMatchInvitations,
 	changeMatchStatus,
+	changeMatchAccessType,
+	getMatchesByAccessType,
 } from "../controllers/matches.js";
 
 const router = Router();
@@ -477,5 +479,37 @@ router.get("/matches/invitations/:user_id/:status", getUserMatchInvitations); //
  *                   example: Error updating match status.
  */
 router.put("/matches/newstatus/", changeMatchStatus); // Route to change status of a match
+
+/**
+ * @swagger
+ * /matches/change_access_type:
+ *  put:
+ *    summary: Change the access type of a match
+ *    tags: [Matches]
+ */
+router.put("/matches/change_access_type", changeMatchAccessType); // Change match access type
+
+/**
+ * @swagger
+ * /matches/access_type/{accessType}:
+ *  get:
+ *    summary: Get matches by access type
+ *    tags: [Matches]
+ *    parameters:
+ *      - in: path
+ *        name: accessType
+ *        schema:
+ *          type: string
+ *        required: true
+ *        description: The access type of the matches ('public' or 'private')
+ *    responses:
+ *      200:
+ *        description: List of matches by access type
+ *      400:
+ *        description: Invalid access type
+ *      500:
+ *        description: Server error
+ */
+router.get("/matches/access_type/:accessType", getMatchesByAccessType);
 
 export default router;

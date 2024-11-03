@@ -229,25 +229,25 @@ export const getFavCenters = async (req, res) => {
 };
 
 ///////////////////////////////////////////////////////////////////
-// Function to get the occupancy of a pitch
+// Function to get the host (occupancy) of a pitch
 //
-export const getPitchOccupancy = async (req, res) => {
+export const getPitchHost = async (req, res) => {
 	let connection;
 	try {
 		// Get a connection from the pool
 		connection = await getConnection();
 
-		// Query to get the occupancy of a pitch
+		// Query to get the host (occupancy) of a pitch
 		const [rows] = await connection.query(
-			`SELECT * FROM pitch_occupancies WHERE pitch_id = ?`,
+			`SELECT * FROM host WHERE pitch_id = ?`,
 			[req.params.pitch_id]
 		);
 
 		// Send the structured response
 		res.json(rows);
 	} catch (error) {
-		console.error("Error getting pitch occupancy:", error);
-		res.status(500).json({ message: "Error getting pitch occupancy." });
+		console.error("Error getting pitch host:", error);
+		res.status(500).json({ message: "Error getting pitch host." });
 	} finally {
 		if (connection) connection.release(); // Release the connection
 	}

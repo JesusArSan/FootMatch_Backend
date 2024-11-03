@@ -4,7 +4,7 @@ import {
 	getCenters,
 	getCenterByPitch,
 	getFavCenters,
-	getPitchOccupancy,
+	getPitchHost,
 	setFavCenter,
 	deleteFavCenter,
 } from "../controllers/centers.js";
@@ -48,12 +48,24 @@ router.get("/centers/:user_id", getFavCenters); // Obtain all fav centers
 
 /**
  * @swagger
- * /Centers:
+ * /pitches/{pitch_id}/host:
  *  get:
- *    summary: Get occupancy of a pitch
- *    tags: [Centers]
+ *    summary: Get the host (occupancy) of a pitch
+ *    tags: [Host]
+ *    parameters:
+ *      - in: path
+ *        name: pitch_id
+ *        schema:
+ *          type: integer
+ *        required: true
+ *        description: The ID of the pitch
+ *    responses:
+ *      200:
+ *        description: Host details of the pitch
+ *      500:
+ *        description: Server error
  */
-router.get("/centers/pitch_occupancies/:pitch_id", getPitchOccupancy); // Obtain all fav centers
+router.get("/centers/pitches/:pitch_id/host", getPitchHost); // Obtain all fav centers
 
 /**
  * @swagger

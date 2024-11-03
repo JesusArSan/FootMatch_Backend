@@ -113,12 +113,13 @@ CREATE TABLE IF NOT EXISTS pitches (
 -------------------------------------------------
 -- OCCUPANCIES TABLE --
 -------------------------------------------------
-CREATE TABLE IF NOT EXISTS pitch_occupancies (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    pitch_id INT,
-    date_time DATETIME NOT NULL,  -- Date and time of the occupancy
-    FOREIGN KEY (pitch_id) REFERENCES pitches(id) ON DELETE CASCADE
-    UNIQUE KEY unique_occupancy (pitch_id, date_time) -- Ensure no overlapping occupancies for the same pitch
+CREATE TABLE IF NOT EXISTS host (
+    pitch_id INT NOT NULL,
+    date_time DATETIME NOT NULL,  -- Date and time of the hosting event
+    match_id INT NOT NULL,  -- References the match for the hosting
+    PRIMARY KEY (pitch_id, date_time),
+    FOREIGN KEY (pitch_id) REFERENCES pitches(id) ON DELETE CASCADE,
+    FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE
 );
 -------------------------------------------------
 -- CENTER_REVIEWS TABLE --
@@ -203,133 +204,12 @@ VALUES
 (24, 'Outdoor 5-a-side grass', 'grass', 'closed', 8),
 (25, 'Indoor 5-a-side', 'indoor', 'active', 8);
 -- Insert data into occupancies table with dates between today and this week
-INSERT INTO center_occupancies (pitch_id, date_time)
+INSERT INTO host (pitch_id, date_time, match_id)
 VALUES
-(1, '2024-08-26 07:30:00'),
-(2, '2024-08-26 07:30:00'),
-(3, '2024-08-26 07:30:00'),
-(4, '2024-08-26 07:30:00'),
-(5, '2024-08-26 07:30:00'),
-(6, '2024-08-26 09:30:00'),
-(7, '2024-08-26 09:30:00'),
-(8, '2024-08-26 09:30:00'),
-(9, '2024-08-26 09:30:00'),
-(10, '2024-08-26 09:30:00'),
-(11, '2024-08-26 11:30:00'),
-(12, '2024-08-26 11:30:00'),
-(13, '2024-08-26 11:30:00'),
-(14, '2024-08-26 11:30:00'),
-(15, '2024-08-26 11:30:00'),
-(16, '2024-08-26 13:30:00'),
-(17, '2024-08-26 13:30:00'),
-(18, '2024-08-26 13:30:00'),
-(19, '2024-08-26 13:30:00'),
-(20, '2024-08-26 13:30:00'),
-(21, '2024-08-26 15:30:00'),
-(22, '2024-08-26 15:30:00'),
-(23, '2024-08-26 15:30:00'),
-(24, '2024-08-26 15:30:00'),
-(25, '2024-08-26 15:30:00'),
-(8, '2024-08-27 09:30:00'),
-(9, '2024-08-27 09:30:00'),
-(10, '2024-08-27 09:30:00'),
-(11, '2024-08-27 11:30:00'),
-(12, '2024-08-27 11:30:00'),
-(13, '2024-08-27 11:30:00'),
-(14, '2024-08-27 11:30:00'),
-(15, '2024-08-27 11:30:00'),
-(16, '2024-08-27 13:30:00'),
-(17, '2024-08-27 13:30:00'),
-(18, '2024-08-27 13:30:00'),
-(19, '2024-08-27 13:30:00'),
-(20, '2024-08-27 13:30:00'),
-(21, '2024-08-27 15:30:00'),
-(22, '2024-08-27 15:30:00'),
-(23, '2024-08-27 15:30:00'),
-(24, '2024-08-27 15:30:00'),
-(25, '2024-08-27 15:30:00'),
-(1, '2024-08-28 07:30:00'),
-(2, '2024-08-28 07:30:00'),
-(3, '2024-08-28 07:30:00'),
-(4, '2024-08-28 07:30:00'),
-(5, '2024-08-28 07:30:00'),
-(6, '2024-08-28 09:30:00'),
-(7, '2024-08-28 09:30:00'),
-(8, '2024-08-28 09:30:00'),
-(1, '2024-08-29 07:30:00'),
-(2, '2024-08-29 07:30:00'),
-(3, '2024-08-29 07:30:00'),
-(4, '2024-08-29 07:30:00'),
-(5, '2024-08-29 07:30:00'),
-(6, '2024-08-29 09:30:00'),
-(7, '2024-08-29 09:30:00'),
-(8, '2024-08-29 09:30:00'),
-(9, '2024-08-29 09:30:00'),
-(10, '2024-08-29 09:30:00'),
-(11, '2024-08-29 11:30:00'),
-(12, '2024-08-29 11:30:00'),
-(13, '2024-08-29 11:30:00'),
-(14, '2024-08-29 11:30:00'),
-(1, '2024-08-30 07:30:00'),
-(2, '2024-08-30 07:30:00'),
-(3, '2024-08-30 07:30:00'),
-(4, '2024-08-30 07:30:00'),
-(5, '2024-08-30 07:30:00'),
-(6, '2024-08-30 09:30:00'),
-(7, '2024-08-30 09:30:00'),
-(8, '2024-08-30 09:30:00'),
-(9, '2024-08-30 09:30:00'),
-(10, '2024-08-30 09:30:00'),
-(11, '2024-08-30 11:30:00'),
-(12, '2024-08-30 11:30:00'),
-(13, '2024-08-30 11:30:00'),
-(14, '2024-08-30 11:30:00'),
-(15, '2024-08-30 11:30:00'),
-(16, '2024-08-30 13:30:00'),
-(17, '2024-08-30 13:30:00'),
-(18, '2024-08-30 13:30:00'),
-(19, '2024-08-30 13:30:00'),
-(1, '2024-08-31 07:30:00'),
-(2, '2024-08-31 07:30:00'),
-(3, '2024-08-31 07:30:00'),
-(4, '2024-08-31 07:30:00'),
-(5, '2024-08-31 07:30:00'),
-(6, '2024-08-31 09:30:00'),
-(7, '2024-08-31 09:30:00'),
-(8, '2024-08-31 09:30:00'),
-(9, '2024-08-31 09:30:00'),
-(10, '2024-08-31 09:30:00'),
-(11, '2024-08-31 11:30:00'),
-(12, '2024-08-31 11:30:00'),
-(13, '2024-08-31 11:30:00'),
-(14, '2024-08-31 11:30:00'),
-(15, '2024-08-31 11:30:00'),
-(16, '2024-08-31 13:30:00'),
-(17, '2024-08-31 13:30:00'),
-(18, '2024-08-31 13:30:00'),
-(19, '2024-08-31 13:30:00'),
-(20, '2024-08-31 13:30:00'),
-(21, '2024-08-31 15:30:00'),
-(22, '2024-08-31 15:30:00'),
-(23, '2024-08-31 15:30:00'),
-(24, '2024-08-31 15:30:00'),
-(25, '2024-08-31 15:30:00'),
-(10, '2024-09-01 09:30:00'),
-(11, '2024-09-01 11:30:00'),
-(12, '2024-09-01 11:30:00'),
-(13, '2024-09-01 11:30:00'),
-(14, '2024-09-01 11:30:00'),
-(15, '2024-09-01 11:30:00'),
-(16, '2024-09-01 13:30:00'),
-(17, '2024-09-01 13:30:00'),
-(18, '2024-09-01 13:30:00'),
-(19, '2024-09-01 13:30:00'),
-(20, '2024-09-01 13:30:00'),
-(21, '2024-09-01 15:30:00'),
-(22, '2024-09-01 15:30:00'),
-(23, '2024-09-01 15:30:00'),
-(24, '2024-09-01 15:30:00'),
-(25, '2024-09-01 15:30:00');
+(1, '2024-08-26 07:30:00', 1),
+(2, '2024-08-26 07:30:00', 2),
+(3, '2024-08-26 09:30:00', 3),
+(4, '2024-08-26 09:30:00', 1);
 -- Centros favoritos de usuarios
 INSERT INTO favourite_centers (user_id, center_id) VALUES (1, 1);
 INSERT INTO favourite_centers (user_id, center_id) VALUES (1, 2);
@@ -353,19 +233,29 @@ CREATE TABLE IF NOT EXISTS teams (
     FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 -------------------------------------------------
+-- BELONGTeam users-teams TABLE --
+-------------------------------------------------
+CREATE TABLE IF NOT EXISTS BelongTeam (
+    user_id INT NOT NULL,
+    team_id INT NOT NULL,
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Use TIMESTAMP with CURRENT_TIMESTAMP as default
+    PRIMARY KEY (user_id, team_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
+);
+-------------------------------------------------
 -- MATCHES TABLE --
 -------------------------------------------------
 CREATE TABLE IF NOT EXISTS matches (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    pitch_id INT NOT NULL, -- References the pitch where the match is played
     team_a_id INT, -- References Team A
     team_b_id INT, -- References Team B
     team_a_score INT DEFAULT 0,
     team_b_score INT DEFAULT 0,
     match_date DATETIME NOT NULL, -- Date and time of the match
     status ENUM('scheduled', 'completed', 'canceled') DEFAULT 'scheduled', -- Status of the match
+    access_type ENUM('public', 'private') DEFAULT 'private', -- Indicates if the match is public or private
     created_by_user_id INT, -- References the user who created the match
-    FOREIGN KEY (pitch_id) REFERENCES pitches(id) ON DELETE CASCADE,
     FOREIGN KEY (team_a_id) REFERENCES teams(id) ON DELETE SET NULL,
     FOREIGN KEY (team_b_id) REFERENCES teams(id) ON DELETE SET NULL,
     FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL

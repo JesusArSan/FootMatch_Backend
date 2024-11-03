@@ -11,40 +11,36 @@ import crypto from "crypto"; // Import to generate unique names
 export const getMatches = async (req, res) => {
 	let connection;
 	try {
-		// Get a connection from the pool
 		connection = await getConnection();
-
-		// User ID from request parameters
 		const userId = req.params.user_id;
 
-		// Query to get matches where the user is the creator of the match
 		const [matchesAsCreator] = await connection.query(
-			`SELECT m.*,
-					team_a.name AS team_a_name, team_a.logo_url AS team_a_logo, team_a.created_at AS team_a_created_at,
-					team_b.name AS team_b_name, team_b.logo_url AS team_b_logo, team_b.created_at AS team_b_created_at
+			`SELECT m.*, host.date_time AS match_date, host.pitch_id,
+					team_a.name AS team_a_name, team_a.logo_url AS team_a_logo,
+					team_b.name AS team_b_name, team_b.logo_url AS team_b_logo
 				FROM matches m
 				LEFT JOIN teams team_a ON m.team_a_id = team_a.id
 				LEFT JOIN teams team_b ON m.team_b_id = team_b.id
+				LEFT JOIN host ON m.id = host.match_id
 				WHERE m.created_by_user_id = ?
-				ORDER BY team_a.created_at ASC, team_b.created_at ASC`,
+				ORDER BY host.date_time ASC`,
 			[userId]
 		);
 
-		// Query to get matches where the user is a participant in either team
 		const [matchesAsPlayer] = await connection.query(
-			`SELECT m.*,
-					team_a.name AS team_a_name, team_a.logo_url AS team_a_logo, team_a.created_at AS team_a_created_at,
-					team_b.name AS team_b_name, team_b.logo_url AS team_b_logo, team_b.created_at AS team_b_created_at
+			`SELECT m.*, host.date_time AS match_date, host.pitch_id,
+					team_a.name AS team_a_name, team_a.logo_url AS team_a_logo,
+					team_b.name AS team_b_name, team_b.logo_url AS team_b_logo
 				FROM matches m
 				LEFT JOIN teams team_a ON m.team_a_id = team_a.id
 				LEFT JOIN teams team_b ON m.team_b_id = team_b.id
 				JOIN match_participants mp ON m.id = mp.match_id
+				LEFT JOIN host ON m.id = host.match_id
 				WHERE mp.user_id = ?
-				ORDER BY team_a.created_at ASC, team_b.created_at ASC`,
+				ORDER BY host.date_time ASC`,
 			[userId]
 		);
 
-		// Combine results and remove duplicates (in case the user is both the creator and a player in the same match)
 		const combinedMatches = [
 			...matchesAsCreator,
 			...matchesAsPlayer.filter(
@@ -52,13 +48,12 @@ export const getMatches = async (req, res) => {
 			),
 		];
 
-		// Send the structured response
 		res.json(combinedMatches);
 	} catch (error) {
 		console.error("Error getting matches:", error);
 		res.status(500).json({ message: "Error getting matches." });
 	} finally {
-		if (connection) connection.release(); // Release the connection
+		if (connection) connection.release();
 	}
 };
 
@@ -68,32 +63,28 @@ export const getMatches = async (req, res) => {
 export const getUserMatchInvitations = async (req, res) => {
 	let connection;
 	try {
-		// Get a connection from the pool
 		connection = await getConnection();
-
-		// Extract user_id and status from request parameters
 		const { user_id, status } = req.params;
 
-		// Query to get all matches where the user has been invited and match them with status
 		const [matches] = await connection.query(
-			`SELECT m.*, 
-			        team_a.name AS team_a_name, team_a.logo_url AS team_a_logo, team_a.created_at AS team_a_created_at,
-			        team_b.name AS team_b_name, team_b.logo_url AS team_b_logo, team_b.created_at AS team_b_created_at
+			`SELECT m.*, host.date_time AS match_date,
+					team_a.name AS team_a_name, team_a.logo_url AS team_a_logo,
+					team_b.name AS team_b_name, team_b.logo_url AS team_b_logo
 			 FROM match_invitations mi
 			 JOIN matches m ON mi.match_id = m.id
 			 LEFT JOIN teams team_a ON m.team_a_id = team_a.id
 			 LEFT JOIN teams team_b ON m.team_b_id = team_b.id
+			 LEFT JOIN host ON m.id = host.match_id
 			 WHERE mi.user_id = ? AND mi.status = ?`,
 			[user_id, status]
 		);
 
-		// Send the response with the matches data only
 		res.json(matches);
 	} catch (error) {
 		console.error("Error getting match invitations:", error);
 		res.status(500).json({ message: "Error getting match invitations." });
 	} finally {
-		if (connection) connection.release(); // Release the connection
+		if (connection) connection.release();
 	}
 };
 
@@ -103,43 +94,37 @@ export const getUserMatchInvitations = async (req, res) => {
 export const getMatchesByStatus = async (req, res) => {
 	let connection;
 	try {
-		// Get a connection from the pool
 		connection = await getConnection();
-
-		// User ID from request parameters
 		const userId = req.params.user_id;
 		const status = req.params.status;
 
-		// Query to get matches where the user is the creator of the match
 		const [matchesAsCreator] = await connection.query(
-			`SELECT m.*,
+			`SELECT m.*, host.date_time AS match_date, host.pitch_id,
 					team_a.name AS team_a_name, team_a.logo_url AS team_a_logo, team_a.created_at AS team_a_created_at,
 					team_b.name AS team_b_name, team_b.logo_url AS team_b_logo, team_b.created_at AS team_b_created_at
 				FROM matches m
 				LEFT JOIN teams team_a ON m.team_a_id = team_a.id
 				LEFT JOIN teams team_b ON m.team_b_id = team_b.id
-				WHERE m.created_by_user_id = ?
-				AND m.status = ?
-				ORDER BY team_a.created_at ASC, team_b.created_at ASC`,
+				LEFT JOIN host ON m.id = host.match_id
+				WHERE m.created_by_user_id = ? AND m.status = ?
+				ORDER BY host.date_time ASC`,
 			[userId, status]
 		);
 
-		// Query to get matches where the user is a participant in either team
 		const [matchesAsPlayer] = await connection.query(
-			`SELECT m.*,
+			`SELECT m.*, host.date_time AS match_date, host.pitch_id,
 					team_a.name AS team_a_name, team_a.logo_url AS team_a_logo, team_a.created_at AS team_a_created_at,
 					team_b.name AS team_b_name, team_b.logo_url AS team_b_logo, team_b.created_at AS team_b_created_at
 				FROM matches m
 				LEFT JOIN teams team_a ON m.team_a_id = team_a.id
 				LEFT JOIN teams team_b ON m.team_b_id = team_b.id
+				LEFT JOIN host ON m.id = host.match_id
 				JOIN match_participants mp ON m.id = mp.match_id
-				WHERE mp.user_id = ?
-				AND m.status = ?
-				ORDER BY team_a.created_at ASC, team_b.created_at ASC`,
+				WHERE mp.user_id = ? AND m.status = ?
+				ORDER BY host.date_time ASC`,
 			[userId, status]
 		);
 
-		// Combine results and remove duplicates (in case the user is both the creator and a player in the same match)
 		const combinedMatches = [
 			...matchesAsCreator,
 			...matchesAsPlayer.filter(
@@ -147,13 +132,12 @@ export const getMatchesByStatus = async (req, res) => {
 			),
 		];
 
-		// Send the structured response
 		res.json(combinedMatches);
 	} catch (error) {
-		console.error("Error getting matches:", error);
-		res.status(500).json({ message: "Error getting matches." });
+		console.error("Error getting matches by status:", error);
+		res.status(500).json({ message: "Error getting matches by status." });
 	} finally {
-		if (connection) connection.release(); // Release the connection
+		if (connection) connection.release();
 	}
 };
 
@@ -217,8 +201,8 @@ export const createMatch = async (req, res) => {
 
 		// Check if the pitch is available at the requested date and time
 		const [existingOccupancy] = await connection.query(
-			"SELECT id FROM pitch_occupancies WHERE pitch_id = ? AND date_time = ?",
-			[pitchId, matchDate] // Ensure matchDate is in 'YYYY-MM-DD HH:MM:SS' format
+			"SELECT pitch_id, date_time FROM host WHERE pitch_id = ? AND date_time = ?",
+			[pitchId, matchDate]
 		);
 		if (existingOccupancy.length > 0) {
 			throw new Error(
@@ -243,24 +227,22 @@ export const createMatch = async (req, res) => {
 			[teamAName, teamAShortName, userId]
 		);
 
-		// Insert Team B. The lider will set after the match is created by the user
+		// Insert Team B
 		const [teamB] = await connection.query(
 			`INSERT INTO teams (name, short_name, created_by_user_id) VALUES (?, ?, ?)`,
 			[teamBName, teamBShortName, userId]
 		);
 
-		// AÑADIR EL LIDER DE LA SALA A LA LISTA DE PARTICIPANTES?????? DEBATIR
-
-		// Insert Match
+		// Insert Match (without match_date)
 		const [match] = await connection.query(
-			`INSERT INTO matches (pitch_id, team_a_id, team_b_id, match_date, created_by_user_id) VALUES (?, ?, ?, ?, ?)`,
-			[pitchId, teamA.insertId, teamB.insertId, matchDate, userId]
+			`INSERT INTO matches (team_a_id, team_b_id, created_by_user_id) VALUES (?, ?, ?)`,
+			[teamA.insertId, teamB.insertId, userId]
 		);
 
-		// Insert the occupancy in pitch_occupancies to mark the pitch as reserved
+		// Insert the occupancy in host to mark the pitch as reserved
 		await connection.query(
-			`INSERT INTO pitch_occupancies (pitch_id, date_time) VALUES (?, ?)`,
-			[pitchId, matchDate]
+			`INSERT INTO host (pitch_id, date_time, match_id) VALUES (?, ?, ?)`,
+			[pitchId, matchDate, match.insertId]
 		);
 
 		// Commit the transaction
@@ -316,7 +298,7 @@ export const cancelMatch = async (req, res) => {
 
 		// Check if the match exists
 		const [match] = await connection.query(
-			"SELECT id, pitch_id, match_date, status FROM matches WHERE id = ?",
+			"SELECT id, match_date, status FROM matches WHERE id = ?",
 			[matchId]
 		);
 		if (match.length === 0) {
@@ -334,11 +316,8 @@ export const cancelMatch = async (req, res) => {
 			[matchId]
 		);
 
-		// Remove the occupancy from pitch_occupancies
-		await connection.query(
-			"DELETE FROM pitch_occupancies WHERE pitch_id = ? AND date_time = ?",
-			[match[0].pitch_id, match[0].match_date]
-		);
+		// Remove the occupancy from host
+		await connection.query("DELETE FROM host WHERE match_id = ?", [matchId]);
 
 		// Commit the transaction
 		await connection.commit();
@@ -836,5 +815,140 @@ export const changeMatchStatus = async (req, res) => {
 		}
 	} finally {
 		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Function to change match access type
+//
+export const changeMatchAccessType = async (req, res) => {
+	let connection;
+	try {
+		// Get matchId and accessType from request body
+		const { matchId, accessType } = req.body;
+
+		// Allowed access type values
+		const allowedAccessTypes = ["public", "private"];
+
+		// Validate the access type
+		if (!allowedAccessTypes.includes(accessType)) {
+			return res.status(400).json({
+				message:
+					"Invalid access type. Allowed values are 'public' or 'private'.",
+			});
+		}
+
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Check if the match exists
+		const [match] = await connection.query(
+			"SELECT id FROM matches WHERE id = ?",
+			[matchId]
+		);
+
+		if (match.length === 0) {
+			throw new Error("Match does not exist.");
+		}
+
+		// Update the match access type
+		await connection.query(
+			"UPDATE matches SET access_type = ? WHERE id = ?",
+			[accessType, matchId]
+		);
+
+		// Send the response
+		res.status(200).json({
+			message: "Match access type updated successfully",
+			matchId: matchId,
+			accessType: accessType,
+		});
+	} catch (error) {
+		// Handle specific errors
+		if (error.message === "Match does not exist.") {
+			res.status(404).json({ message: "Match does not exist." });
+		} else {
+			console.error("Error updating match access type:", error);
+			res.status(500).json({ message: "Error updating match access type." });
+		}
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Function to get matches by access type
+//
+export const getMatchesByAccessType = async (req, res) => {
+	let connection;
+	try {
+		connection = await getConnection();
+		const { accessType } = req.params;
+
+		const allowedAccessTypes = ["public", "private"];
+		if (!allowedAccessTypes.includes(accessType)) {
+			console.log("Invalid access type provided:", accessType);
+			return res.status(400).json({
+				message:
+					"Invalid access type. Allowed values are 'public' or 'private'.",
+			});
+		}
+
+		// First query to get match details
+		const [matches] = await connection.query(
+			`SELECT m.*, host.date_time AS match_date, host.pitch_id,
+				team_a.name AS team_a_name, team_a.logo_url AS team_a_logo,
+				team_b.name AS team_b_name, team_b.logo_url AS team_b_logo
+			 FROM matches m
+			 LEFT JOIN teams team_a ON m.team_a_id = team_a.id
+			 LEFT JOIN teams team_b ON m.team_b_id = team_b.id
+			 LEFT JOIN host ON m.id = host.match_id
+			 WHERE m.access_type = ?
+			 ORDER BY host.date_time ASC`,
+			[accessType]
+		);
+
+		// Ensure there are matches before proceeding
+		if (matches.length === 0) {
+			return res.json([]);
+		}
+
+		// Collect unique pitch IDs
+		const pitchIds = [...new Set(matches.map((match) => match.pitch_id))];
+
+		// Second query to get center details
+		const [centerData] = await connection.query(
+			`SELECT p.id AS pitch_id, c.title AS center_name, c.address
+			 FROM pitches p
+			 LEFT JOIN centers c ON p.center_id = c.id
+			 WHERE p.id IN (?)`,
+			[pitchIds]
+		);
+
+		// Map center data
+		const centerMap = centerData.reduce((map, center) => {
+			map[center.pitch_id] = {
+				center_name: center.center_name,
+				address: center.address,
+			};
+			return map;
+		}, {});
+
+		// Attach center information to each match
+		const enrichedMatches = matches.map((match) => ({
+			...match,
+			center_name:
+				centerMap[match.pitch_id]?.center_name || "Center not available",
+			address: centerMap[match.pitch_id]?.address || "Address not available",
+		}));
+
+		res.json(enrichedMatches);
+	} catch (error) {
+		console.error("Error getting matches by access type:", error); // Detailed error
+		res.status(500).json({
+			message: "Error getting matches by access type.",
+		});
+	} finally {
+		if (connection) connection.release();
 	}
 };

@@ -1,0 +1,52 @@
+@api = http://localhost:3000/teams
+
+# Create a new team
+POST {{api}}
+Content-Type: application/json
+
+{
+   "name": "My New Team",
+   "short_name": "MNT",
+   "logo_url": "https://example.com/logo.png",
+   "is_custom_team": 1,
+   "created_by_user_id": 1
+}
+###
+
+# Get users in a team
+GET {{api}}/144/users
+###
+
+
+# Update an existing team
+PUT {{api}}/138
+Content-Type: application/json
+
+{
+   "name": "Updated Team NameFCB",
+   "short_name": "UTN",
+   "logo_url": "https://example.com/new_logo.png",
+   "is_custom_team": 0
+}
+###
+
+# Delete a team
+DELETE {{api}}/131
+###
+
+# Add a user to a team
+POST {{api}}/144/add_user/1
+Content-Type: application/json
+###
+
+# Get teams created by a user
+GET {{api}}/user/1/created
+###
+
+# Get teams a user belongs to
+GET {{api}}/user/2
+###
+
+# Remove a user from a team
+DELETE {{api}}/132/remove_user/2
+###
