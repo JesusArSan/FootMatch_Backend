@@ -145,3 +145,7 @@ Content-Type: application/json
     "role_id": 2
 }
 ###
+
+# Get last game played
+GET {{api}}/1/completed-match
+###

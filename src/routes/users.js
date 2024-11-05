@@ -21,6 +21,7 @@ import {
 	validateToken,
 	updateProfilePhoto,
 	updateUserRole,
+	getLatestCompletedMatchForUser,
 } from "../controllers/users.js";
 
 const router = Router();
@@ -249,5 +250,67 @@ router.put("/users/:userId/update_photo", updateProfilePhoto);
  *          type: integer
  */
 router.put("/users/:user_id/update_role", updateUserRole); // Update user role
+
+/**
+ * @swagger
+ * /users/{userId}/completed-match:
+ *  get:
+ *    summary: Get the latest completed match for a user
+ *    tags: [matches]
+ *    parameters:
+ *      - in: path
+ *        name: userId
+ *        required: true
+ *        schema:
+ *          type: integer
+ *        description: ID of the user
+ *    responses:
+ *      200:
+ *        description: Latest completed match details
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                matchId:
+ *                  type: integer
+ *                  description: ID of the match
+ *                teamA:
+ *                  type: object
+ *                  properties:
+ *                    name:
+ *                      type: string
+ *                      description: Name of team A
+ *                    logo:
+ *                      type: string
+ *                      description: Logo URL of team A
+ *                    score:
+ *                      type: integer
+ *                      description: Score of team A
+ *                teamB:
+ *                  type: object
+ *                  properties:
+ *                    name:
+ *                      type: string
+ *                      description: Name of team B
+ *                    logo:
+ *                      type: string
+ *                      description: Logo URL of team B
+ *                    score:
+ *                      type: integer
+ *                      description: Score of team B
+ *                status:
+ *                  type: string
+ *                  description: Status of the match (e.g., completed)
+ *                date:
+ *                  type: string
+ *                  format: date-time
+ *                  description: Date and time of the match
+ *      404:
+ *        description: No completed matches found for this user
+ *      500:
+ *        description: Server error
+ */
+router.get("/users/:userId/completed-match", getLatestCompletedMatchForUser);
 
 export default router;

@@ -253,9 +253,10 @@ CREATE TABLE IF NOT EXISTS matches (
     team_a_score INT DEFAULT 0,
     team_b_score INT DEFAULT 0,
     match_date DATETIME NOT NULL, -- Date and time of the match
-    status ENUM('scheduled', 'completed', 'canceled') DEFAULT 'scheduled', -- Status of the match
+    status ENUM('scheduled', , 'completed', 'canceled') DEFAULT 'scheduled', -- Status of the match
     access_type ENUM('public', 'private') DEFAULT 'private', -- Indicates if the match is public or private
     created_by_user_id INT, -- References the user who created the match
+    match_done BOOLEAN DEFAULT FALSE, -- Indicates if the match has been played
     FOREIGN KEY (team_a_id) REFERENCES teams(id) ON DELETE SET NULL,
     FOREIGN KEY (team_b_id) REFERENCES teams(id) ON DELETE SET NULL,
     FOREIGN KEY (created_by_user_id) REFERENCES users(id) ON DELETE SET NULL

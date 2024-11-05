@@ -728,3 +728,71 @@ export const updateUserRole = async (req, res) => {
 		if (connection) connection.release(); // Release the connection
 	}
 };
+
+///////////////////////////////////////////////////////////////////
+// Get the latest completed match for a user
+//
+export const getLatestCompletedMatchForUser = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		const { userId } = req.params; // Get userId from URL parameters
+
+		// Fetch completed matches for the user, including date, pitch_id, and creator details
+		const [completedMatches] = await connection.query(
+			`
+			SELECT m.id AS matchId, h.date_time AS date, m.status,
+				m.created_by_user_id AS createdByUserId, m.match_done, h.pitch_id AS pitchId,
+				teamA.name AS teamAName, teamA.logo_url AS teamALogo, m.team_a_score AS teamAScore,
+				teamB.name AS teamBName, teamB.logo_url AS teamBLogo, m.team_b_score AS teamBScore
+			FROM matches m
+			JOIN teams teamA ON m.team_a_id = teamA.id
+			JOIN teams teamB ON m.team_b_id = teamB.id
+			JOIN match_participants mp ON mp.match_id = m.id
+			JOIN host h ON h.match_id = m.id
+			WHERE mp.user_id = ? AND m.status = 'completed'
+			ORDER BY h.date_time DESC
+			LIMIT 1;
+			`,
+			[userId]
+		);
+
+		// Check if a completed match was found
+		if (completedMatches.length === 0) {
+			return res
+				.status(404)
+				.json({ message: "No completed matches found for this user." });
+		}
+
+		// Get the latest completed match
+		const match = completedMatches[0];
+
+		// Successful response
+		res.json({
+			matchId: match.matchId,
+			date: match.date,
+			status: match.status,
+			pitchId: match.pitchId,
+			createdByUserId: match.createdByUserId,
+			teamA: {
+				name: match.teamAName,
+				logo: match.teamALogo,
+				score: match.teamAScore,
+			},
+			teamB: {
+				name: match.teamBName,
+				logo: match.teamBLogo,
+				score: match.teamBScore,
+			},
+		});
+	} catch (error) {
+		console.error("Error fetching latest completed match for user:", error);
+		res.status(500).json({
+			message: "Error fetching latest completed match for user.",
+		});
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
