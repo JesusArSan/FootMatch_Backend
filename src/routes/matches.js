@@ -22,6 +22,9 @@ import {
 	setNewVisitorTeamToMatch,
 	removeAllPlayersFromMatch,
 	addPlayersToMatchFromTeam,
+	setParticipantGoals,
+	setParticipantAssists,
+	setMatchGoals,
 } from "../controllers/matches.js";
 
 const router = Router();
@@ -638,5 +641,113 @@ router.post(
 	"/matches/:matchId/teams/:teamId/players",
 	addPlayersToMatchFromTeam
 );
+
+/**
+ * @swagger
+ * /matches/participants/goals:
+ *  put:
+ *    summary: Set goals for a participant in a match
+ *    tags: [matches]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            required:
+ *              - matchId
+ *              - userId
+ *              - goals
+ *            properties:
+ *              matchId:
+ *                type: integer
+ *                description: The ID of the match
+ *              userId:
+ *                type: integer
+ *                description: The ID of the participant
+ *              goals:
+ *                type: integer
+ *                description: Number of goals scored by the participant
+ *    responses:
+ *      200:
+ *        description: Participant goals updated successfully
+ *      404:
+ *        description: Participant not found in the match
+ *      500:
+ *        description: Server error
+ */
+router.put("/matches/participants/goals", setParticipantGoals);
+
+/**
+ * @swagger
+ * /matches/participants/assists:
+ *  put:
+ *    summary: Set assists for a participant in a match
+ *    tags: [matches]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            required:
+ *              - matchId
+ *              - userId
+ *              - assists
+ *            properties:
+ *              matchId:
+ *                type: integer
+ *                description: The ID of the match
+ *              userId:
+ *                type: integer
+ *                description: The ID of the participant
+ *              assists:
+ *                type: integer
+ *                description: Number of assists made by the participant
+ *    responses:
+ *      200:
+ *        description: Participant assists updated successfully
+ *      404:
+ *        description: Participant not found in the match
+ *      500:
+ *        description: Server error
+ */
+router.put("/matches/participants/assists", setParticipantAssists);
+
+/**
+ * @swagger
+ * /matches/goals:
+ *  put:
+ *    summary: Set match score for teams A and B
+ *    tags: [matches]
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            required:
+ *              - matchId
+ *              - teamAScore
+ *              - teamBScore
+ *            properties:
+ *              matchId:
+ *                type: integer
+ *                description: The ID of the match
+ *              teamAScore:
+ *                type: integer
+ *                description: Score of team A
+ *              teamBScore:
+ *                type: integer
+ *                description: Score of team B
+ *    responses:
+ *      200:
+ *        description: Match score updated successfully
+ *      404:
+ *        description: Match not found
+ *      500:
+ *        description: Server error
+ */
+router.put("/matches/goals", setMatchGoals);
 
 export default router;

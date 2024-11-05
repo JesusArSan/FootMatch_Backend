@@ -283,6 +283,8 @@ CREATE TABLE IF NOT EXISTS match_participants (
     user_id INT NOT NULL, -- References the participating user
     team_id INT, -- References the team the user is in
     is_leader BOOLEAN DEFAULT FALSE, -- Indicates if the user is the team leader
+    goals INT DEFAULT 0,
+    assists INT DEFAULT 0,
     FOREIGN KEY (match_id) REFERENCES matches(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE SET NULL

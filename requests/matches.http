@@ -26,11 +26,11 @@ Content-Type: application/json
 ###
 
 # Get all participants from a match
-GET {{api}}/participants/35
+GET {{api}}/participants/29
 ###
 
 # Get match deatils from match id
-GET {{api}}/35
+GET {{api}}/6
 ###
 
 # Get all matches from user and status
@@ -42,8 +42,8 @@ POST {{api}}/participants
 Content-Type: application/json
 
 {
-   "matchId": 4,
-   "userId": 2
+   "matchId": 29,
+   "userId": 9
 }
 ###
 
@@ -164,4 +164,37 @@ DELETE {{api}}/6/players
 
 # Add players from a custom team to a match
 POST {{api}}/6/teams/217/players
+###
+
+# Set goals for a participant
+PUT {{api}}/participants/goals
+Content-Type: application/json
+
+{
+   "matchId": 6,
+   "userId": 7,
+   "goals": 3
+}
+###
+
+# Set assists for a participant
+PUT {{api}}/participants/assists
+Content-Type: application/json
+
+{
+   "matchId": 6,
+   "userId": 7,
+   "assists": 2
+}
+###
+
+# Set match score for teams A and B
+PUT {{api}}/goals
+Content-Type: application/json
+
+{
+   "matchId": 4,
+   "teamAScore": 2,
+   "teamBScore": 1
+}
 ###

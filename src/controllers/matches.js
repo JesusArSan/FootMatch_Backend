@@ -1250,3 +1250,106 @@ export const addPlayersToMatchFromTeam = async (req, res) => {
 		if (connection) connection.release();
 	}
 };
+
+///////////////////////////////////////////////////////////////////
+// Set goals for a participant in a match
+//
+export const setParticipantGoals = async (req, res) => {
+	let connection;
+	try {
+		const { matchId, userId, goals } = req.body;
+
+		connection = await getConnection();
+
+		const [result] = await connection.query(
+			"UPDATE match_participants SET goals = ? WHERE match_id = ? AND user_id = ?",
+			[goals, matchId, userId]
+		);
+
+		if (result.affectedRows === 0) {
+			return res
+				.status(404)
+				.json({ message: "Participant not found in the match." });
+		}
+
+		res.status(200).json({
+			message: "Participant goals updated successfully",
+			matchId,
+			userId,
+			goals,
+		});
+	} catch (error) {
+		console.error("Error setting participant goals:", error);
+		res.status(500).json({ message: "Error setting participant goals." });
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Set assists for a participant in a match
+//
+export const setParticipantAssists = async (req, res) => {
+	let connection;
+	try {
+		const { matchId, userId, assists } = req.body;
+
+		connection = await getConnection();
+
+		const [result] = await connection.query(
+			"UPDATE match_participants SET assists = ? WHERE match_id = ? AND user_id = ?",
+			[assists, matchId, userId]
+		);
+
+		if (result.affectedRows === 0) {
+			return res
+				.status(404)
+				.json({ message: "Participant not found in the match." });
+		}
+
+		res.status(200).json({
+			message: "Participant assists updated successfully",
+			matchId,
+			userId,
+			assists,
+		});
+	} catch (error) {
+		console.error("Error setting participant assists:", error);
+		res.status(500).json({ message: "Error setting participant assists." });
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Set match score for teams A and B
+//
+export const setMatchGoals = async (req, res) => {
+	let connection;
+	try {
+		const { matchId, teamAScore, teamBScore } = req.body;
+
+		connection = await getConnection();
+
+		const [result] = await connection.query(
+			"UPDATE matches SET team_a_score = ?, team_b_score = ? WHERE id = ?",
+			[teamAScore, teamBScore, matchId]
+		);
+
+		if (result.affectedRows === 0) {
+			return res.status(404).json({ message: "Match not found." });
+		}
+
+		res.status(200).json({
+			message: "Match score updated successfully",
+			matchId,
+			teamAScore,
+			teamBScore,
+		});
+	} catch (error) {
+		console.error("Error setting match goals:", error);
+		res.status(500).json({ message: "Error setting match goals." });
+	} finally {
+		if (connection) connection.release();
+	}
+};
