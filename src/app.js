@@ -13,6 +13,7 @@ import usersRoutes from "./routes/users.js";
 import centersRoutes from "./routes/centers.js";
 import matchesRoutes from "./routes/matches.js";
 import teamsRoutes from "./routes/teams.js";
+import competitionsRoutes from "./routes/competitions.js";
 
 const app = express();
 
@@ -28,6 +29,8 @@ app.use(centersRoutes);
 app.use(matchesRoutes);
 // TeamsRoutes from the file routes/teams.js
 app.use(teamsRoutes);
+// CompetitionsRoutes from the file routes/competitions.js
+app.use(competitionsRoutes);
 
 // Swagger. Documents the routes
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(specs));

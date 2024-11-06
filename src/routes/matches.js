@@ -25,6 +25,8 @@ import {
 	setParticipantGoals,
 	setParticipantAssists,
 	setMatchGoals,
+	setMatchIsDone,
+	getMatchDone,
 } from "../controllers/matches.js";
 
 const router = Router();
@@ -749,5 +751,53 @@ router.put("/matches/participants/assists", setParticipantAssists);
  *        description: Server error
  */
 router.put("/matches/goals", setMatchGoals);
+
+/**
+ * @swagger
+ * /matches/{matchId}/done:
+ *   put:
+ *     summary: Set match as done
+ *     tags:
+ *       - matches
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the match to mark as done
+ *     responses:
+ *       200:
+ *         description: Match marked as done
+ *       404:
+ *         description: Match not found or already marked as done
+ *       500:
+ *         description: Server error
+ */
+router.put("/matches/:matchId/done", setMatchIsDone); // Set match as done
+
+/**
+ * @swagger
+ * /matches/{matchId}/done:
+ *   get:
+ *     summary: Get match done status
+ *     tags:
+ *       - matches
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the match to get the done status
+ *     responses:
+ *       200:
+ *         description: Returns the match done status
+ *       404:
+ *         description: Match not found
+ *       500:
+ *         description: Server error
+ */
+router.get("/matches/:matchId/done", getMatchDone); // Get match done status
 
 export default router;

@@ -149,3 +149,43 @@ Content-Type: application/json
 # Get last game played
 GET {{api}}/1/completed-match
 ###
+
+# Create a new publication
+POST {{api}}/publications
+Content-Type: application/json
+
+{
+    "text": "This is a sample publication from the user 5",
+    "likes": 10,
+    "user_id": 5
+}
+###
+
+# Delete a publication by ID
+DELETE {{api}}/publications/1
+###
+
+# Get publications from friends
+GET {{api}}/publications/friends/2
+###
+
+# Get the number of likes of a publication
+GET {{api}}/publications/2/likes
+###
+
+# Add a like to a publication
+POST {{api}}/publications/2/like
+###
+
+# Remove a like from a publication
+DELETE {{api}}/publications/2/like
+###
+
+# Update user experience points
+PUT {{api}}/7/exp
+###
+
+# Get user experience points
+GET {{api}}/3/exp
+###
+

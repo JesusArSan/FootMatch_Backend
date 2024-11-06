@@ -1,0 +1,63 @@
+@api = http://localhost:3000/competitions
+
+# Create a new competition
+POST {{api}}/create
+Content-Type: application/json
+
+{
+   "name": "Summer Cup",
+   "start_date": "2024-11-06",
+   "end_date": "2024-12-30",
+   "status": "scheduled",
+   "logo_url": "https://e7.pngegg.com/pngimages/151/231/png-clipart-logo-football-football-logo-blue-other-thumbnail.png",
+   "created_by": 1
+}
+###
+
+# Get competition by ID
+GET {{api}}/5
+###
+
+# Update an existing competition
+PUT {{api}}/3
+Content-Type: application/json
+
+{
+   "name": "Updated Summer Cup",
+   "start_date": "2024-06-01",
+   "end_date": "2024-07-01",
+   "status": "scheduled",
+   "logo_url": "https://e7.pngegg.com/pngimages/151/231/png-clipart-logo-football-football-logo-blue-other-thumbnail.png"
+}
+###
+
+# Delete a competition
+DELETE {{api}}/4
+###
+
+# Add a team to a competition
+POST {{api}}/team
+Content-Type: application/json
+
+{
+   "team_id": 220,
+   "competition_id": 5
+}
+###
+
+# Remove a team from a competition
+DELETE {{api}}/4/team/220
+###
+
+# Delete all matches for a competition and reset is_draw
+DELETE {{api}}/5/matches
+###
+
+# Draw teams and reserve slots for a competition
+POST {{api}}/5/draw_and_reserve
+Content-Type: application/json
+
+{}
+###
+
+

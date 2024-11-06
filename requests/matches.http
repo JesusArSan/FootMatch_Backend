@@ -198,3 +198,11 @@ Content-Type: application/json
    "teamBScore": 1
 }
 ###
+
+# Mark match as done
+PUT {{api}}/20/done
+###
+
+# Get match done status
+GET {{api}}/29/done
+###

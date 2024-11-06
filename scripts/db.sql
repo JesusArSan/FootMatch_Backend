@@ -18,9 +18,10 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     role_id INT NOT NULL DEFAULT 2,  -- Default value set to 3 (regular user)
     photo VARCHAR(255),
+    user_exp DECIMAL(5,2) DEFAULT 0, -- User experience points
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    status VARCHAR(20) DEFAULT 'active'
+    status VARCHAR(20) DEFAULT 'active',
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
 CREATE TABLE IF NOT EXISTS roles (
@@ -220,6 +221,18 @@ INSERT INTO favourite_centers (user_id, center_id) VALUES (2, 6);
 INSERT INTO favourite_centers (user_id, center_id) VALUES (2, 7);
 
 -------------------------------------------------
+-- PUBLICATIONS TABLE --
+-------------------------------------------------
+CREATE TABLE IF NOT EXISTS publications (
+    id INT PRIMARY KEY AUTO_INCREMENT,           -- Primary Key
+    post_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Date of the post
+    text VARCHAR(255) NOT NULL,                  -- Text content of the post
+    likes INT DEFAULT 0,                         -- Number of likes
+    user_id INT,                                 -- Foreign Key referencing Users
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+-------------------------------------------------
 -- TEAMS TABLE --
 -------------------------------------------------
 CREATE TABLE IF NOT EXISTS teams (
@@ -235,7 +248,7 @@ CREATE TABLE IF NOT EXISTS teams (
 -------------------------------------------------
 -- BELONGTeam users-teams TABLE --
 -------------------------------------------------
-CREATE TABLE IF NOT EXISTS BelongTeam (
+CREATE TABLE IF NOT EXISTS belongTeam (
     user_id INT NOT NULL,
     team_id INT NOT NULL,
     joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Use TIMESTAMP with CURRENT_TIMESTAMP as default
@@ -252,7 +265,6 @@ CREATE TABLE IF NOT EXISTS matches (
     team_b_id INT, -- References Team B
     team_a_score INT DEFAULT 0,
     team_b_score INT DEFAULT 0,
-    match_date DATETIME NOT NULL, -- Date and time of the match
     status ENUM('scheduled', , 'completed', 'canceled') DEFAULT 'scheduled', -- Status of the match
     access_type ENUM('public', 'private') DEFAULT 'private', -- Indicates if the match is public or private
     created_by_user_id INT, -- References the user who created the match
@@ -290,6 +302,29 @@ CREATE TABLE IF NOT EXISTS match_participants (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE SET NULL
 );
+
+CREATE TABLE IF NOT EXISTS competitions (
+    id INT PRIMARY KEY AUTO_INCREMENT,                     -- Primary key
+    name VARCHAR(255) NOT NULL,                            -- Competition name
+    start_date DATE NOT NULL,                              -- Start date
+    end_date DATE NOT NULL,                                -- End date
+    status ENUM('scheduled', 'canceled', 'finished') NOT NULL,  -- Competition status
+    logo_url VARCHAR(255) NOT NULL,                        -- Logo URL
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,        -- Creation timestamp
+    created_by INT,                                        -- Foreign key to Users
+    is_draw BOOLEAN DEFAULT FALSE,                         -- Indicates if the competition allows draws
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+
+CREATE TABLE IF NOT EXISTS comp_teams (
+    team_id INT,                                     -- Foreign key to Teams
+    competition_id INT,                              -- Foreign key to Competitions
+    PRIMARY KEY (team_id, competition_id),           -- Composite primary key
+    FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+    FOREIGN KEY (competition_id) REFERENCES competitions(id) ON DELETE CASCADE
+);
+
 -------------------------------------------------
 -- Matches and teams TABLE DATA --
 -------------------------------------------------

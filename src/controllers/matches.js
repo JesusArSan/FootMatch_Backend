@@ -1353,3 +1353,72 @@ export const setMatchGoals = async (req, res) => {
 		if (connection) connection.release();
 	}
 };
+
+///////////////////////////////////////////////////////////////////
+// Set Match as Done
+//
+export const setMatchIsDone = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Match ID from request parameters
+		const matchId = req.params.matchId;
+
+		// Query to update match_done to true
+		const [result] = await connection.query(
+			`UPDATE matches SET match_done = TRUE WHERE id = ?`,
+			[matchId]
+		);
+
+		// Check if the update was successful
+		if (result.affectedRows === 0) {
+			return res
+				.status(404)
+				.json({ message: "Match not found or already marked as done." });
+		}
+
+		// Send success response
+		res.json({ message: "Match marked as done." });
+	} catch (error) {
+		console.error("Error setting match as done:", error);
+		res.status(500).json({ message: "Error setting match as done." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Get Match Done Status
+//
+export const getMatchDone = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Match ID from request parameters
+		const matchId = req.params.matchId;
+
+		// Query to get match_done status
+		const [match] = await connection.query(
+			`SELECT match_done FROM matches WHERE id = ?`,
+			[matchId]
+		);
+
+		// Check if the match was found
+		if (!match.length) {
+			return res.status(404).json({ message: "Match not found." });
+		}
+
+		// Send the match_done status
+		res.json({ match_done: match[0].match_done });
+	} catch (error) {
+		console.error("Error getting match done status:", error);
+		res.status(500).json({ message: "Error getting match done status." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+

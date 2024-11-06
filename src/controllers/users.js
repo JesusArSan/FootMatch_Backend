@@ -796,3 +796,327 @@ export const getLatestCompletedMatchForUser = async (req, res) => {
 		if (connection) connection.release(); // Release the connection
 	}
 };
+
+///////////////////////////////////////////////////////////////////
+// Create Publication
+//
+export const createPublication = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Data from request body
+		const { text, likes = 0, user_id } = req.body;
+
+		// Query to insert new publication (post_on will default to current timestamp)
+		const [result] = await connection.query(
+			`INSERT INTO publications (text, likes, user_id) VALUES (?, ?, ?)`,
+			[text, likes, user_id]
+		);
+
+		// Send success response with new publication ID
+		res.json({
+			message: "Publication created successfully",
+			publicationId: result.insertId,
+		});
+	} catch (error) {
+		console.error("Error creating publication:", error);
+		res.status(500).json({ message: "Error creating publication." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Delete Publication
+//
+export const deletePublication = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Publication ID from request parameters
+		const publicationId = req.params.id;
+
+		// Query to delete publication
+		const [result] = await connection.query(
+			`DELETE FROM publications WHERE id = ?`,
+			[publicationId]
+		);
+
+		// Check if the delete was successful
+		if (result.affectedRows === 0) {
+			return res.status(404).json({ message: "Publication not found." });
+		}
+
+		// Send success response
+		res.json({ message: "Publication deleted successfully." });
+	} catch (error) {
+		console.error("Error deleting publication:", error);
+		res.status(500).json({ message: "Error deleting publication." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Get Friends' Publications
+//
+export const getFriendsPublications = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// User ID from request parameters
+		const userId = req.params.id;
+
+		// Get friends of the user
+		const [friends] = await connection.query(
+			`SELECT u.id
+				FROM friends f
+				JOIN users u ON f.friend_id = u.id
+				WHERE f.user_id = ?`,
+			[userId]
+		);
+
+		// Extract friend IDs
+		const friendIds = friends.map((friend) => friend.id);
+		if (friendIds.length === 0) {
+			return res.json([]);
+		}
+
+		// Query to get publications of friends
+		const [publications] = await connection.query(
+			`SELECT p.*
+				FROM publications p
+				WHERE p.user_id IN (?)`,
+			[friendIds]
+		);
+
+		// Send the publications response
+		res.json(publications);
+	} catch (error) {
+		console.error("Error getting friends' publications:", error);
+		res.status(500).json({ message: "Error getting friends' publications." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Add Like to Publication
+//
+export const addLike = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Publication ID from request parameters
+		const publicationId = req.params.id;
+
+		// Query to increment the like count
+		const [result] = await connection.query(
+			`UPDATE publications SET likes = likes + 1 WHERE id = ?`,
+			[publicationId]
+		);
+
+		// Check if the update was successful
+		if (result.affectedRows === 0) {
+			return res.status(404).json({ message: "Publication not found." });
+		}
+
+		// Send success response
+		res.json({ message: "Like added successfully." });
+	} catch (error) {
+		console.error("Error adding like to publication:", error);
+		res.status(500).json({ message: "Error adding like to publication." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Remove Like from Publication
+//
+export const removeLike = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Publication ID from request parameters
+		const publicationId = req.params.id;
+
+		// Query to decrement the like count, ensuring it does not go below zero
+		const [result] = await connection.query(
+			`UPDATE publications SET likes = GREATEST(likes - 1, 0) WHERE id = ?`,
+			[publicationId]
+		);
+
+		// Check if the update was successful
+		if (result.affectedRows === 0) {
+			return res.status(404).json({ message: "Publication not found." });
+		}
+
+		// Send success response
+		res.json({ message: "Like removed successfully." });
+	} catch (error) {
+		console.error("Error removing like from publication:", error);
+		res.status(500).json({
+			message: "Error removing like from publication.",
+		});
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Get Likes of Publication
+//
+export const getLikes = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// Publication ID from request parameters
+		const publicationId = req.params.id;
+
+		// Query to get the like count
+		const [result] = await connection.query(
+			`SELECT likes FROM publications WHERE id = ?`,
+			[publicationId]
+		);
+
+		// Check if the publication was found
+		if (!result.length) {
+			return res.status(404).json({ message: "Publication not found." });
+		}
+
+		// Send the like count
+		res.json({ likes: result[0].likes });
+	} catch (error) {
+		console.error("Error getting likes of publication:", error);
+		res.status(500).json({ message: "Error getting likes of publication." });
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Update User Experience Points
+//
+export const updateUserExp = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// User ID from request parameters
+		const userId = req.params.id;
+
+		// Query to calculate statistics for the user
+		const [stats] = await connection.query(
+			`SELECT 
+					SUM(mp.goals) AS total_goals,
+					SUM(mp.assists) AS total_assists,
+					COUNT(mp.match_id) AS matches_played,
+					SUM(CASE WHEN m.status = 'completed' AND m.team_a_id = mp.team_id AND m.team_a_score > m.team_b_score THEN 1
+								WHEN m.status = 'completed' AND m.team_b_id = mp.team_id AND m.team_b_score > m.team_a_score THEN 1
+								ELSE 0 END) AS matches_won,
+					SUM(CASE WHEN m.status = 'completed' AND m.team_a_id = mp.team_id AND m.team_a_score < m.team_b_score THEN 1
+								WHEN m.status = 'completed' AND m.team_b_id = mp.team_id AND m.team_b_score < m.team_a_score THEN 1
+								ELSE 0 END) AS matches_lost
+			  FROM match_participants mp
+			  JOIN matches m ON mp.match_id = m.id
+			  WHERE mp.user_id = ?`,
+			[userId]
+		);
+
+		// Check if user has any match records
+		if (!stats.length || stats[0].matches_played === 0) {
+			return res
+				.status(404)
+				.json({ message: "No match records found for the user." });
+		}
+
+		// Extract stats
+		const {
+			total_goals,
+			total_assists,
+			matches_played,
+			matches_won,
+			matches_lost,
+		} = stats[0];
+
+		// Calculate experience bonus based on matches played
+		const experience_bonus = matches_played > 15 ? 1.2 : 1.0;
+
+		// Calculate total experience points
+		const user_exp =
+			(total_goals * 2 +
+				total_assists * 1.5 +
+				matches_won * 3 -
+				matches_lost * 1.5 +
+				matches_played * 0.5) *
+			experience_bonus;
+
+		// Update user_exp in users table
+		await connection.query(`UPDATE users SET user_exp = ? WHERE id = ?`, [
+			user_exp,
+			userId,
+		]);
+
+		// Send success response with updated experience points
+		res.json({
+			message: "User experience points updated successfully.",
+			user_exp,
+		});
+	} catch (error) {
+		console.error("Error updating user experience points:", error);
+		res.status(500).json({
+			message: "Error updating user experience points.",
+		});
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Get User Experience Points
+//
+export const getUserExp = async (req, res) => {
+	let connection;
+	try {
+		// Get a connection from the pool
+		connection = await getConnection();
+
+		// User ID from request parameters
+		const userId = req.params.id;
+
+		// Query to get user experience points
+		const [user] = await connection.query(
+			`SELECT user_exp FROM users WHERE id = ?`,
+			[userId]
+		);
+
+		// Check if the user was found
+		if (!user.length) {
+			return res.status(404).json({ message: "User not found." });
+		}
+
+		// Send the user experience points
+		res.json({ user_exp: user[0].user_exp });
+	} catch (error) {
+		console.error("Error getting user experience points:", error);
+		res.status(500).json({
+			message: "Error getting user experience points.",
+		});
+	} finally {
+		if (connection) connection.release(); // Release the connection
+	}
+};
