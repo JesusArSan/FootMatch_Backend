@@ -8,9 +8,7 @@ Content-Type: application/json
    "name": "Summer Cup",
    "start_date": "2024-11-06",
    "end_date": "2024-12-30",
-   "status": "scheduled",
-   "logo_url": "https://e7.pngegg.com/pngimages/151/231/png-clipart-logo-football-football-logo-blue-other-thumbnail.png",
-   "created_by": 1
+   "created_by": 3
 }
 ###
 
@@ -19,7 +17,7 @@ GET {{api}}/5
 ###
 
 # Update an existing competition
-PUT {{api}}/3
+PUT {{api}}/26
 Content-Type: application/json
 
 {
@@ -29,7 +27,7 @@ Content-Type: application/json
    "status": "scheduled",
    "logo_url": "https://e7.pngegg.com/pngimages/151/231/png-clipart-logo-football-football-logo-blue-other-thumbnail.png"
 }
-###
+###5
 
 # Delete a competition
 DELETE {{api}}/4
@@ -40,24 +38,42 @@ POST {{api}}/team
 Content-Type: application/json
 
 {
-   "team_id": 220,
-   "competition_id": 5
+   "team_id": 3,
+   "competition_id": 28
 }
 ###
 
 # Remove a team from a competition
-DELETE {{api}}/4/team/220
+DELETE {{api}}/28/team/217
 ###
 
 # Delete all matches for a competition and reset is_draw
-DELETE {{api}}/5/matches
+DELETE {{api}}/28/matches
 ###
 
 # Draw teams and reserve slots for a competition
-POST {{api}}/5/draw_and_reserve
+POST {{api}}/28/draw_and_reserve
 Content-Type: application/json
 
 {}
 ###
 
+GET {{api}}/5/teams
+Content-Type: application/json
+###
 
+GET {{api}}/user/3
+Content-Type: application/json
+###
+
+GET {{api}}
+Content-Type: application/json
+###
+
+# Get all custom teams not in a competition
+GET {{api}}/5/teams_custom_not_in
+###
+
+# Get all matches from competition
+GET {{api}}/28/matches
+###

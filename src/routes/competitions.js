@@ -9,6 +9,11 @@ import {
 	removeTeamFromCompetition,
 	generateMatchesAndReserve,
 	deleteCompetitionMatches,
+	getCompetitionTeams,
+	getCompetitionsByUser,
+	getAllCompetitions,
+	getCustomTeamsNotInCompetition,
+	getCompetitionMatches,
 } from "../controllers/competitions.js";
 
 const router = Router();
@@ -260,5 +265,187 @@ router.post("/competitions/:id/draw_and_reserve", generateMatchesAndReserve); //
  *         description: Server error
  */
 router.delete("/competitions/:id/matches", deleteCompetitionMatches); // Delete all matches for a competition and reset is_draw
+
+/**
+ * @swagger
+ * /competitions/{id}/teams:
+ *   get:
+ *     summary: Get list of teams in a competition
+ *     tags:
+ *       - competitions
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the competition to retrieve teams for
+ *     responses:
+ *       200:
+ *         description: List of teams in the competition
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 teams:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                         description: ID of the team
+ *                       name:
+ *                         type: string
+ *                         description: Name of the team
+ *                       short_name:
+ *                         type: string
+ *                         description: Short name of the team
+ *                       logo_url:
+ *                         type: string
+ *                         description: URL of the team's logo
+ *       404:
+ *         description: No teams found for this competition
+ *       500:
+ *         description: Server error
+ */
+router.get("/competitions/:id/teams", getCompetitionTeams); // Get list of teams in a competition
+
+/**
+ * @swagger
+ * /competitions/user/{userId}:
+ *   get:
+ *     summary: Get competitions created by a specific user
+ *     tags:
+ *       - competitions
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the user
+ *     responses:
+ *       200:
+ *         description: List of competitions created by the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   name:
+ *                     type: string
+ *                   start_date:
+ *                     type: string
+ *                     format: date
+ *                   end_date:
+ *                     type: string
+ *                     format: date
+ *                   status:
+ *                     type: string
+ *                   logo_url:
+ *                     type: string
+ *                   created_by:
+ *                     type: integer
+ *       404:
+ *         description: No competitions found for this user
+ *       500:
+ *         description: Server error
+ */
+router.get("/competitions/user/:userId", getCompetitionsByUser);
+
+/**
+ * @swagger
+ * /competitions:
+ *   get:
+ *     summary: Get all competitions
+ *     tags:
+ *       - competitions
+ *     responses:
+ *       200:
+ *         description: List of all competitions
+ *       500:
+ *         description: Server error
+ */
+router.get("/competitions", getAllCompetitions);
+
+/**
+ * @swagger
+ * /teams/custom/not_in_competition/{competitionId}:
+ *   get:
+ *     summary: Get all custom teams not in a specific competition
+ *     tags:
+ *       - teams
+ *     parameters:
+ *       - in: path
+ *         name: competitionId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the competition
+ *     responses:
+ *       200:
+ *         description: List of custom teams not in the competition
+ *       500:
+ *         description: Server error
+ */
+router.get(
+	"/competitions/:competitionId/teams_custom_not_in",
+	getCustomTeamsNotInCompetition
+);
+
+/**
+ * @swagger
+ * /competitions/{id}/matches:
+ *   get:
+ *     summary: Get all matches for a specific competition
+ *     tags:
+ *       - competitions
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the competition
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of matches for the specified competition
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 matches:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       match_id:
+ *                         type: integer
+ *                       team_a:
+ *                         type: string
+ *                       team_b:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                       pitch_id:
+ *                         type: integer
+ *                       date_time:
+ *                         type: string
+ *                         format: date-time
+ *       404:
+ *         description: Competition not found
+ *       500:
+ *         description: Server error
+ */
+router.get("/competitions/:id/matches", getCompetitionMatches);
 
 export default router;

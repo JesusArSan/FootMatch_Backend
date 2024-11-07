@@ -182,7 +182,7 @@ DELETE {{api}}/publications/2/like
 ###
 
 # Update user experience points
-PUT {{api}}/7/exp
+PUT {{api}}/3/exp
 ###
 
 # Get user experience points

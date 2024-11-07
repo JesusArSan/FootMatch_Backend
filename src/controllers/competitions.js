@@ -23,12 +23,16 @@ export const createCompetition = async (req, res) => {
 	let connection;
 	try {
 		connection = await getConnection();
-		const { name, start_date, end_date, status, logo_url, created_by } =
-			req.body;
+		const { name, start_date, end_date, created_by_user_id } = req.body;
+		const logo_url =
+			req.body.logo_url ||
+			"https://e7.pngegg.com/pngimages/151/231/png-clipart-logo-football-football-logo-blue-other-thumbnail.png";
+
+		console.log("Creating competition with data:", req.body);
 
 		const [result] = await connection.query(
-			`INSERT INTO competitions (name, start_date, end_date, status, logo_url, created_by) VALUES (?, ?, ?, ?, ?, ?)`,
-			[name, start_date, end_date, status, logo_url, created_by]
+			`INSERT INTO competitions (name, start_date, end_date, status, logo_url, created_by) VALUES (?, ?, ?, 'scheduled', ?, ?)`,
+			[name, start_date, end_date, logo_url, created_by_user_id]
 		);
 
 		res.json({
@@ -86,8 +90,26 @@ export const updateCompetition = async (req, res) => {
 	try {
 		connection = await getConnection();
 		const competitionId = req.params.id;
-		const { name, start_date, end_date, status, logo_url } = req.body;
+		const { name } = req.body;
 
+		// Obtener los valores actuales de la competición
+		const [currentCompetition] = await connection.query(
+			`SELECT start_date, end_date, status, logo_url FROM competitions WHERE id = ?`,
+			[competitionId]
+		);
+
+		if (currentCompetition.length === 0) {
+			return res.status(404).json({ message: "Competition not found." });
+		}
+
+		// Establecer valores por defecto usando los existentes si no se proporcionan en la solicitud
+		const start_date =
+			req.body.start_date || currentCompetition[0].start_date;
+		const end_date = req.body.end_date || currentCompetition[0].end_date;
+		const status = req.body.status || currentCompetition[0].status;
+		const logo_url = req.body.logo_url || currentCompetition[0].logo_url;
+
+		// Actualizar la competición
 		const [result] = await connection.query(
 			`UPDATE competitions SET name = ?, start_date = ?, end_date = ?, status = ?, logo_url = ? WHERE id = ?`,
 			[name, start_date, end_date, status, logo_url, competitionId]
@@ -412,6 +434,167 @@ export const deleteCompetitionMatches = async (req, res) => {
 		console.error("Error deleting matches for the competition:", error);
 		res.status(500).json({
 			message: "Error deleting matches for the competition.",
+		});
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Get Teams in a Competition
+//
+export const getCompetitionTeams = async (req, res) => {
+	let connection;
+	try {
+		connection = await getConnection();
+		const competitionId = req.params.id;
+
+		// Query to retrieve teams in the competition
+		const [teams] = await connection.query(
+			`SELECT t.id, t.name, t.short_name, t.logo_url 
+			 FROM teams t
+			 JOIN comp_teams ct ON t.id = ct.team_id
+			 WHERE ct.competition_id = ?`,
+			[competitionId]
+		);
+
+		if (teams.length === 0) {
+			return res
+				.status(404)
+				.json({ message: "No teams found for this competition." });
+		}
+
+		res.json({ teams });
+	} catch (error) {
+		console.error("Error retrieving teams for competition:", error);
+		res.status(500).json({ message: "Error retrieving teams." });
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Get Competitions by User
+//
+export const getCompetitionsByUser = async (req, res) => {
+	let connection;
+	try {
+		connection = await getConnection();
+		const userId = req.params.userId;
+
+		// Query to fetch competitions created by the user
+		const [competitions] = await connection.query(
+			`SELECT * FROM competitions WHERE created_by = ?`,
+			[userId]
+		);
+
+		if (competitions.length === 0) {
+			return res
+				.status(404)
+				.json({ message: "No competitions found for this user." });
+		}
+
+		res.json(competitions);
+	} catch (error) {
+		console.error("Error retrieving competitions by user:", error);
+		res.status(500).json({ message: "Error retrieving competitions." });
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Get all competitions
+//
+export const getAllCompetitions = async (req, res) => {
+	let connection;
+	try {
+		connection = await getConnection();
+		const [competitions] = await connection.query(
+			`SELECT * FROM competitions`
+		);
+
+		res.json(competitions); // Return the list of all competitions
+	} catch (error) {
+		console.error("Error retrieving all competitions:", error);
+		res.status(500).json({ message: "Error retrieving competitions." });
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+///////////////////////////////////////////////////////////////////
+// Get all custom teams not in a specific competition
+//
+export const getCustomTeamsNotInCompetition = async (req, res) => {
+	let connection;
+	try {
+		connection = await getConnection();
+		const competitionId = req.params.competitionId;
+
+		console.log("Getting custom teams not in competition:", competitionId);
+
+		// Consulta para obtener equipos personalizados que no están en la competición
+		const [teams] = await connection.query(
+			`SELECT * FROM teams 
+			 WHERE is_custom_team = 1 
+			 AND id NOT IN (SELECT team_id FROM comp_teams WHERE competition_id = ?)`,
+			[competitionId]
+		);
+
+		res.json(teams);
+	} catch (error) {
+		console.error("Error retrieving custom teams not in competition:", error);
+		res.status(500).json({ message: "Error retrieving custom teams." });
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+// Get Matches for a Competition
+export const getCompetitionMatches = async (req, res) => {
+	let connection;
+	try {
+		connection = await getConnection();
+		const competitionId = req.params.id;
+
+		// Check if the competition exists
+		const [competition] = await connection.query(
+			`SELECT id FROM competitions WHERE id = ?`,
+			[competitionId]
+		);
+
+		if (competition.length === 0) {
+			return res.status(404).json({ message: "Competition not found." });
+		}
+
+		// Retrieve matches for the competition along with team names and reservation details
+		const [matches] = await connection.query(
+			`SELECT 
+					m.id AS match_id,
+					ta.name AS team_a,
+					tb.name AS team_b,
+					m.status,
+					h.pitch_id,
+					h.date_time
+			  FROM matches m
+			  JOIN teams ta ON m.team_a_id = ta.id
+			  JOIN teams tb ON m.team_b_id = tb.id
+			  JOIN host h ON m.id = h.match_id
+			  WHERE ta.id IN (SELECT team_id FROM comp_teams WHERE competition_id = ?)
+			  AND tb.id IN (SELECT team_id FROM comp_teams WHERE competition_id = ?)
+			  ORDER BY h.date_time ASC`,
+			[competitionId, competitionId]
+		);
+
+		res.json({
+			message: "Matches retrieved successfully",
+			matches: matches,
+		});
+	} catch (error) {
+		console.error("Error retrieving matches:", error);
+		res.status(500).json({
+			message: "Error retrieving matches.",
 		});
 	} finally {
 		if (connection) connection.release();
