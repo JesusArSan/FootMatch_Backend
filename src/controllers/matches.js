@@ -288,51 +288,63 @@ export const createMatch = async (req, res) => {
 export const cancelMatch = async (req, res) => {
 	let connection;
 	try {
-		// Extracting data from request body
+		// Extraer el `matchId` del cuerpo de la solicitud
 		const { matchId } = req.body;
 
-		// Get a connection from the pool
+		// Obtener una conexión de la base de datos
 		connection = await getConnection();
 
-		// Start a transaction to ensure atomicity
+		// Iniciar una transacción
 		await connection.beginTransaction();
 
-		// Check if the match exists
+		// Comprobar si el partido existe
 		const [match] = await connection.query(
-			"SELECT id, match_date, status FROM matches WHERE id = ?",
+			"SELECT id, status FROM matches WHERE id = ?",
 			[matchId]
 		);
 		if (match.length === 0) {
 			throw new Error("Match does not exist.");
 		}
 
-		// Check if the match is already canceled
+		// Comprobar si el partido ya está cancelado
 		if (match[0].status === "canceled") {
 			throw new Error("Match is already canceled.");
 		}
 
-		// Update the match status to 'canceled'
+		// Eliminar participantes del partido
+		await connection.query(
+			"DELETE FROM match_participants WHERE match_id = ?",
+			[matchId]
+		);
+
+		// Eliminar invitaciones asociadas al partido
+		await connection.query(
+			"DELETE FROM match_invitations WHERE match_id = ?",
+			[matchId]
+		);
+
+		// Eliminar ocupaciones en `host`
+		await connection.query("DELETE FROM host WHERE match_id = ?", [matchId]);
+
+		// Actualizar el estado del partido a 'canceled'
 		await connection.query(
 			"UPDATE matches SET status = 'canceled' WHERE id = ?",
 			[matchId]
 		);
 
-		// Remove the occupancy from host
-		await connection.query("DELETE FROM host WHERE match_id = ?", [matchId]);
-
-		// Commit the transaction
+		// Confirmar la transacción
 		await connection.commit();
 
-		// Send the response with cancellation details
+		// Enviar respuesta de éxito
 		res.status(200).json({
 			message: "Match canceled successfully",
 			matchId: matchId,
 			status: "canceled",
 		});
 	} catch (error) {
-		if (connection) await connection.rollback(); // Rollback on error
+		if (connection) await connection.rollback(); // Revertir cambios en caso de error
 
-		// Handle specific errors
+		// Manejar errores específicos
 		if (error.message === "Match does not exist.") {
 			res.status(400).json({ message: "Match does not exist." });
 		} else if (error.message === "Match is already canceled.") {
@@ -342,7 +354,7 @@ export const cancelMatch = async (req, res) => {
 			res.status(500).json({ message: "Error canceling match." });
 		}
 	} finally {
-		if (connection) connection.release(); // Release the connection
+		if (connection) connection.release(); // Liberar la conexión
 	}
 };
 
