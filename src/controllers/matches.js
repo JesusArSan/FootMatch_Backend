@@ -1167,6 +1167,47 @@ export const setNewVisitorTeamToMatch = async (req, res) => {
 };
 
 ///////////////////////////////////////////////////////////////////
+// Update team for a match participant
+//
+export const updateMatchParticipantTeam = async (req, res) => {
+	let connection;
+	try {
+		const { matchId, userId } = req.params;
+
+		const { teamId } = req.body;
+
+		if (!teamId) {
+			return res.status(400).json({ message: "teamId is required." });
+		}
+
+		connection = await getConnection();
+
+		const [result] = await connection.query(
+			"UPDATE match_participants SET team_id = ? WHERE match_id = ? AND user_id = ?",
+			[teamId, matchId, userId]
+		);
+
+		if (result.affectedRows === 0) {
+			return res
+				.status(404)
+				.json({ message: "Participant not found in the match." });
+		}
+
+		res.status(200).json({
+			message: "Participant team updated successfully",
+			matchId,
+			userId,
+			teamId,
+		});
+	} catch (error) {
+		console.error("Error updating participant team:", error);
+		res.status(500).json({ message: "Error updating participant team." });
+	} finally {
+		if (connection) connection.release();
+	}
+};
+
+///////////////////////////////////////////////////////////////////
 // Function to remove all players from a match
 //
 export const removeAllPlayersFromMatch = async (req, res) => {
@@ -1421,4 +1462,3 @@ export const getMatchDone = async (req, res) => {
 		if (connection) connection.release(); // Release the connection
 	}
 };
-

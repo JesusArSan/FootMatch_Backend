@@ -206,3 +206,11 @@ PUT {{api}}/20/done
 # Get match done status
 GET {{api}}/29/done
 ###
+
+PUT {{api}}/148/participants/1/team
+Content-Type: application/json
+
+{
+   "teamId": 3
+}
+###

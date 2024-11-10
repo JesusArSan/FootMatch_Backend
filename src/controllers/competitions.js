@@ -245,7 +245,7 @@ export const generateMatchesAndReserve = async (req, res) => {
 		connection = await getConnection();
 		const competitionId = req.params.id;
 
-		// Get competition dates and check if draw has been done
+		// Obtener las fechas de la competición y verificar si ya se realizó el sorteo
 		const [competition] = await connection.query(
 			`SELECT start_date, end_date, is_draw, created_by FROM competitions WHERE id = ?`,
 			[competitionId]
@@ -263,7 +263,7 @@ export const generateMatchesAndReserve = async (req, res) => {
 			});
 		}
 
-		// Get teams in the competition
+		// Obtener los equipos en la competición
 		const [teams] = await connection.query(
 			`SELECT t.id FROM teams t
             JOIN comp_teams ct ON t.id = ct.team_id
@@ -281,7 +281,7 @@ export const generateMatchesAndReserve = async (req, res) => {
 		const reservedMatches = [];
 		const availableDates = [];
 
-		// Generate list of dates between start_date and end_date
+		// Generar lista de fechas entre start_date y end_date
 		let currentDate = new Date(start_date);
 		const endDate = new Date(end_date);
 		while (currentDate <= endDate) {
@@ -289,7 +289,7 @@ export const generateMatchesAndReserve = async (req, res) => {
 			currentDate.setDate(currentDate.getDate() + 1);
 		}
 
-		// Get active pitches and existing reservations
+		// Obtener canchas activas y reservaciones existentes
 		const [pitches] = await connection.query(
 			`SELECT id FROM pitches WHERE status = 'active'`
 		);
@@ -300,7 +300,9 @@ export const generateMatchesAndReserve = async (req, res) => {
 			[availablePitches]
 		);
 
-		// Generate home and away matches for each team
+		let lastAssignedDateIndex = 0;
+
+		// Generar partidos de ida y vuelta para cada equipo y distribuirlos en diferentes fechas
 		for (let i = 0; i < teamIds.length; i++) {
 			for (let j = i + 1; j < teamIds.length; j++) {
 				const homeAwayMatches = [
@@ -311,9 +313,24 @@ export const generateMatchesAndReserve = async (req, res) => {
 				for (let match of homeAwayMatches) {
 					let reserved = false;
 
-					for (let date of availableDates) {
-						if (reserved) break;
+					// Asignar la siguiente fecha disponible para este partido
+					while (lastAssignedDateIndex < availableDates.length) {
+						const date = availableDates[lastAssignedDateIndex];
+						lastAssignedDateIndex++;
 
+						const dateFormatted = date.toISOString().split("T")[0];
+
+						// Verificar que ninguno de los equipos tenga otro partido el mismo día
+						const teamHasMatchOnDate = reservedMatches.some(
+							(reservedMatch) =>
+								reservedMatch.date === dateFormatted &&
+								(reservedMatch.team_a_id === match.team_a_id ||
+									reservedMatch.team_b_id === match.team_b_id)
+						);
+
+						if (teamHasMatchOnDate) continue; // Si alguno de los equipos ya tiene un partido ese día, saltamos a la siguiente fecha
+
+						// Intentar reservar la cancha y el horario
 						for (let pitchId of availablePitches) {
 							if (reserved) break;
 
@@ -334,7 +351,7 @@ export const generateMatchesAndReserve = async (req, res) => {
 									.slice(0, 19)
 									.replace("T", " ");
 
-								// Check if the pitch and slot are available
+								// Verificar si la cancha y el horario están disponibles
 								const isAvailable = !reservations.some(
 									(res) =>
 										res.pitch_id === pitchId &&
@@ -342,7 +359,7 @@ export const generateMatchesAndReserve = async (req, res) => {
 								);
 
 								if (isAvailable) {
-									// Create match and reserve slot, assigning the creator of the competition
+									// Crear partido y reservar slot, asignando al creador de la competición
 									const [result] = await connection.query(
 										`INSERT INTO matches (team_a_id, team_b_id, status, created_by_user_id) VALUES (?, ?, 'scheduled', ?)`,
 										[match.team_a_id, match.team_b_id, created_by]
@@ -352,8 +369,14 @@ export const generateMatchesAndReserve = async (req, res) => {
 										[pitchId, reservationFormatted, result.insertId]
 									);
 
+									// Registrar el partido reservado
 									reserved = true;
-									reservedMatches.push(result.insertId);
+									reservedMatches.push({
+										id: result.insertId,
+										date: dateFormatted,
+										team_a_id: match.team_a_id,
+										team_b_id: match.team_b_id,
+									});
 									reservations.push({
 										pitch_id: pitchId,
 										date_time: reservationFormatted,
@@ -362,6 +385,8 @@ export const generateMatchesAndReserve = async (req, res) => {
 								}
 							}
 						}
+
+						if (reserved) break;
 					}
 
 					if (!reserved) {
@@ -373,7 +398,7 @@ export const generateMatchesAndReserve = async (req, res) => {
 			}
 		}
 
-		// Update competition to indicate draw is complete
+		// Marcar la competición como "draw" completado
 		await connection.query(
 			`UPDATE competitions SET is_draw = true WHERE id = ?`,
 			[competitionId]
@@ -381,7 +406,7 @@ export const generateMatchesAndReserve = async (req, res) => {
 
 		res.json({
 			message: "Matches created and slots reserved successfully",
-			matches: reservedMatches,
+			matches: reservedMatches.map((match) => match.id),
 		});
 	} catch (error) {
 		console.error("Error generating matches and reservations:", error);

@@ -27,6 +27,7 @@ import {
 	setMatchGoals,
 	setMatchIsDone,
 	getMatchDone,
+	updateMatchParticipantTeam,
 } from "../controllers/matches.js";
 
 const router = Router();
@@ -799,5 +800,44 @@ router.put("/matches/:matchId/done", setMatchIsDone); // Set match as done
  *         description: Server error
  */
 router.get("/matches/:matchId/done", getMatchDone); // Get match done status
+
+/**
+ * @swagger
+ * /matches/{matchId}/participants/{userId}/team:
+ *   put:
+ *     summary: Update team for a match participant
+ *     tags:
+ *       - match participants
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the match
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: The ID of the participant (user)
+ *       - in: body
+ *         name: teamId
+ *         required: true
+ *         description: The ID of the new team to assign to the participant
+ *         schema:
+ *           type: object
+ *           properties:
+ *             teamId:
+ *               type: integer
+ *     responses:
+ *       200:
+ *         description: Team updated successfully for the match participant
+ *       404:
+ *         description: Match participant not found
+ *       500:
+ *         description: Server error
+ */
+router.put("/matches/:matchId/participants/:userId/team", updateMatchParticipantTeam);
 
 export default router;
