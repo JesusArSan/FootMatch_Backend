@@ -907,7 +907,7 @@ export const getMatchesByAccessType = async (req, res) => {
 			});
 		}
 
-		// First query to get match details
+		// First query to get match details, filtered by access type and status
 		const [matches] = await connection.query(
 			`SELECT m.*, host.date_time AS match_date, host.pitch_id,
 				team_a.name AS team_a_name, team_a.logo_url AS team_a_logo,
@@ -916,7 +916,7 @@ export const getMatchesByAccessType = async (req, res) => {
 			 LEFT JOIN teams team_a ON m.team_a_id = team_a.id
 			 LEFT JOIN teams team_b ON m.team_b_id = team_b.id
 			 LEFT JOIN host ON m.id = host.match_id
-			 WHERE m.access_type = ?
+			 WHERE m.access_type = ? AND m.status = 'scheduled'
 			 ORDER BY host.date_time ASC`,
 			[accessType]
 		);
@@ -957,7 +957,7 @@ export const getMatchesByAccessType = async (req, res) => {
 
 		res.json(enrichedMatches);
 	} catch (error) {
-		console.error("Error getting matches by access type:", error); // Detailed error
+		console.error("Error getting matches by access type:", error);
 		res.status(500).json({
 			message: "Error getting matches by access type.",
 		});
